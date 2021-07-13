@@ -16,17 +16,22 @@ export class ScaleWithLegendBox extends LinearScale implements Scale {
     drawLegend() {
         const legend = this.getLegend();
 
-        const dataset_count = legend.length;
-        const s = Math.sqrt(dataset_count);
-        const column_count = Math.ceil(s);
-        const row_count = Math.floor(s);
+        const dsCount = legend.length;
+        const s = Math.sqrt(dsCount);
+        const rowCount = Math.floor(s);
+        let columnCount = Math.ceil(s);
 
-        const width = 30;
+        if (rowCount === 1) {
+            columnCount = dsCount;
+        }
+
+        const maxWidth = this.right - this.left;
+        const width = maxWidth > 30 ? 30 : maxWidth;
         const height = 30;
         const ctx = this.chart.canvas.getContext('2d');
 
-        const field_width = width / column_count;
-        const field_height = height / row_count;
+        const field_width = width / columnCount;
+        const field_height = height / rowCount;
 
         const padding = (this.right - this.left - width) / 2;
         const boxX = this.left + padding;
@@ -34,8 +39,8 @@ export class ScaleWithLegendBox extends LinearScale implements Scale {
 
         for (let i = 0; i < legend.length; ++i) {
             ctx.fillStyle = legend[i];
-            const row = Math.round(i / column_count);
-            const column = i % column_count;
+            const row = Math.floor(i / columnCount);
+            const column = i % columnCount;
             const x = column * field_width + boxX;
             const y = row * field_height + boxY;
 
