@@ -7,9 +7,9 @@ import {combineLatest, of, SubscriptionLike, timer} from 'rxjs';
 import * as _moment from 'moment';
 import {default as _rollupMoment} from 'moment';
 import {Chart_Value_Item, Paginator_Chart_Value, SchemeService} from '../../scheme.service';
-import {Axis_Config, Chart_Item, Device_Item, DIG_Param, Register_Type} from '../../scheme';
+import {Chart_Item, Device_Item, DIG_Param, Register_Type} from '../../scheme';
 import {Scheme_Group_Member} from '../../../user';
-import {BuiltChartParams, Chart_Info_Interface, Chart_Type, ChartFilter, ItemWithLegend, ZoomInfo} from './chart-types';
+import {BuiltChartParams, Chart_Info_Interface, Chart_Type, ChartFilter, ZoomInfo} from './chart-types';
 import {ChartItemComponent} from './chart-item/chart-item.component';
 import {Hsl} from './color-picker-dialog/color-picker-dialog';
 import {SidebarService} from '../../sidebar.service';
@@ -155,13 +155,14 @@ export class ChartsComponent implements OnDestroy {
         // if (enableUserAxes) {
         chart.axes.sort((a, b) => <number>a.order - <number>b.order);
         const chartAxes = chart.axes.reduce((r, axe) => {
-            const { id, from, to, display, isRight } = axe;
+            const { id, from, to, display, isRight, displayGrid } = axe;
             r[id] = ChartsComponent.genAxis(
                 id,
                 isRight ? 'right' : 'left',
                 +from,
                 +to,
                 display,
+                displayGrid,
             );
             return r;
         }, {});
@@ -377,6 +378,7 @@ export class ChartsComponent implements OnDestroy {
         min: number,
         max: number,
         display: false | 'auto',
+        displayGrid: boolean = true,
         type = 'LinearWithLegend',
     ): LinearScaleOptions & {id: string} {
         const axis: any = {
@@ -394,7 +396,7 @@ export class ChartsComponent implements OnDestroy {
             beginAtZero: false,
             offset: false,
             grid: {
-                display: true, // TODO: make it configurable (issue #115)
+                display: displayGrid,
                 drawTicks: false,
             },
         };
@@ -595,14 +597,14 @@ export class ChartsComponent implements OnDestroy {
     }
 
     onChartBuilt(chart: Chart_Info_Interface, $event: BuiltChartParams) {
-        this.reportChartAxes(chart, $event);
+        this.reportChartAxes($event);
     }
 
     onChartAxeChange(chart: Chart_Info_Interface, $event: BuiltChartParams) {
-        this.reportChartAxes(chart, $event);
+        this.reportChartAxes($event);
     }
 
-    private reportChartAxes(chart: Chart_Info_Interface, params: BuiltChartParams) {
+    private reportChartAxes(params: BuiltChartParams) {
         this.sidebarService.performActionToSidebar({
             type: 'chart_axes',
             data: params,

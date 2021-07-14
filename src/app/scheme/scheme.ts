@@ -253,6 +253,7 @@ export interface Axis_Config {
     isRight: boolean;
     stepped: boolean;
     display: false | 'auto';
+    displayGrid: boolean;
     from: number | string;
     to: number | string;
     order: number | string;
@@ -277,6 +278,7 @@ export class Chart_Item<T = Device_Item | DIG_Param> extends Chart_Item_Config {
     item: T;
 
     extra?: Chart_Item_Config['extra'] & {
+        title: string;
         displayColor: string;
     };
 }

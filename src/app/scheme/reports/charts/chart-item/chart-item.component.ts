@@ -28,7 +28,7 @@ import * as Chart from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import 'chartjs-adapter-moment';
 import {Axis_Config} from '../../../scheme';
-import {ChartOptions} from 'chart.js';
+import {ChartOptions, LinearScale} from 'chart.js';
 import {ScaleWithLegendBox} from './scale-with-legend-box';
 
 Chart.Chart.register(
@@ -500,15 +500,16 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
     private getAxes(): Axis_Config[] {
         return Object.keys(this.chart.scales)
             .map((key) => {
-                const scaleItem = this.chart.scales[key];
+                const scaleItem = this.chart.scales[key] as LinearScale;
                 return {
                     id: key,
                     isRight: scaleItem.position === 'right',
                     from: scaleItem.min,
                     to: scaleItem.max,
                     order: 0,
-                    stepped: null, // TODO: ??
+                    stepped: null,
                     display: scaleItem.options.display as 'auto' | false,
+                    displayGrid: scaleItem.options.grid.display,
                 };
             });
     }

@@ -32,26 +32,6 @@ export interface TimeFilter
     timeTo: number;
 }
 
-export interface Legend_Options {
-    idx: number;
-
-    color: Hsl;
-    displayColor: string;
-    stepped: boolean;
-    hidden: boolean;
-
-    scale: Omit<Axis_Config, 'id'>;
-}
-
-export interface ItemWithLegend<T> {
-    isParam: boolean;
-    item: T;
-    legend: Legend_Options;
-    label: string;
-
-    showModal?: boolean; // this param is needed to show/hide axis configuration modal
-}
-
 export interface Chart_Params {
     name: string;
     axes: Axis_Params[];

@@ -1,25 +1,20 @@
 import {Component, IterableDiffer, IterableDiffers, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import * as moment from 'moment';
-import {
-    BuiltChartParams,
-    Chart_Info_Interface,
-    Chart_Params,
-    Chart_Type,
-    ChartFilter,
-    ItemWithLegend,
-    Select_Item_Iface
-} from '../chart-types';
+import {BuiltChartParams, Chart_Info_Interface, Chart_Params, Chart_Type, ChartFilter, Select_Item_Iface} from '../chart-types';
 import {
     Axis_Config,
+    Axis_Params,
+    Chart_Item,
+    Chart_Item_Config,
     Chart_old,
-    Chart_Item, Chart_Item_old,
     Device_Item,
     Device_Item_Group,
     DIG_Param,
     DIG_Param_Value_Type,
     Save_Algorithm,
-    Section, Chart, Axis_Params, Saved_User_Chart, Chart_Item_Config
+    Saved_User_Chart,
+    Section
 } from '../../../scheme';
 import {SchemeService} from '../../../scheme.service';
 import {ColorPickerDialog, Hsl} from '../color-picker-dialog/color-picker-dialog';
@@ -298,34 +293,6 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         }
     }
 
-    private static pushToDatasetParams(dataset_params_ref: ItemWithLegend<Device_Item | DIG_Param>[], item: Device_Item | DIG_Param, isParam: boolean = false) {
-        const idx = dataset_params_ref.length;
-        const title = (<Device_Item>item).type?.title || (<DIG_Param>item).param?.title;
-        const color = ChartFilterComponent.getColorByIndex(idx, title);
-        const displayColor = `hsl(${color.h}, ${color.s}%, ${color.l}%)`;
-
-        dataset_params_ref.push({
-            label: title,
-            item,
-            isParam,
-            legend: {
-                hidden: false,
-                scale: {
-                    from: null,
-                    to: null,
-                    isRight: null,
-                    order: idx,
-                    display: 'auto',
-                    stepped: null,
-                },
-                displayColor,
-                color,
-                idx,
-                stepped: null,
-            }
-        });
-    }
-
     initDeviceItemDatasetsImpl(dev_items: Chart_Item_Iface[], params: Chart_Item_Iface[], axe: Axis_Params): void {
         const sections = this.schemeService.scheme.section;
 
@@ -363,7 +330,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
             this.setupUserChart(<Chart_old>user_chart);
         } else {
             const { axes } = <Saved_User_Chart>user_chart;
-            const axisParams: Axis_Params[] = axes.map((axe) => {
+            this.axes = axes.map((axe) => {
                 const axisParam = {
                     ...axe,
                     datasets: [],
@@ -373,9 +340,9 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 const params: Chart_Item_Iface[] = [];
                 axe.datasets.forEach((ds) => {
                     if (ds.isParam) {
-                        params.push({ id: ds.param_id, hsl: ds.extra.color });
+                        params.push({id: ds.param_id, hsl: ds.extra.color});
                     } else {
-                        items.push({ id: ds.item_id, hsl: ds.extra.color });
+                        items.push({id: ds.item_id, hsl: ds.extra.color});
                     }
                 });
 
@@ -383,8 +350,6 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
 
                 return axisParam;
             });
-
-            this.axes = axisParams;
         }
     }
 
@@ -619,7 +584,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                     },
                 }));
 
-            const { id, isRight, stepped, display, from, to, order } = axe;
+            const { id, isRight, stepped, display, from, to, order, displayGrid } = axe;
 
             return {
                 id,
@@ -627,6 +592,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 isRight,
                 stepped,
                 display,
+                displayGrid,
                 from,
                 to,
                 order,
@@ -849,11 +815,12 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 .reduce((prev, curr) => prev > curr ? prev : curr);
         }
 
-        const axe:  Axis_Params = {
+        const axe: Axis_Params = {
             id,
             isRight: false,
             stepped: false,
             display: 'auto',
+            displayGrid: true,
             from: -50,
             to: 50,
             order: maxOrder,
@@ -877,7 +844,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 this.addAxis(); // for item default
                 this.addAxis(); // for param
 
-                const [item, param] = this.axes;
+                const [, param] = this.axes;
                 param.stepped = true;
                 param.from = -1;
                 param.to = 2;
@@ -917,6 +884,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
             extra: {
                 color,
                 displayColor: `hsl(${color.h}, ${color.s}%, ${color.l}%)`,
+                title: isParam ? (<DIG_Param>item).param.title : (<Device_Item>item).type.title,
                 hidden: false,
             },
         });
