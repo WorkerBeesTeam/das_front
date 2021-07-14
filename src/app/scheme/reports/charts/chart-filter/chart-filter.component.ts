@@ -1,8 +1,26 @@
 import {Component, IterableDiffer, IterableDiffers, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import * as moment from 'moment';
-import {Chart_Info_Interface, Chart_Params, Chart_Type, ChartFilter, ItemWithLegend, Select_Item_Iface} from '../chart-types';
-import {Chart, Chart_Item, Device_Item, Device_Item_Group, DIG_Param, DIG_Param_Value_Type, Save_Algorithm, Section} from '../../../scheme';
+import {
+    BuiltChartParams,
+    Chart_Info_Interface,
+    Chart_Params,
+    Chart_Type,
+    ChartFilter,
+    ItemWithLegend,
+    Select_Item_Iface
+} from '../chart-types';
+import {
+    Axis_Config,
+    Chart_old,
+    Chart_Item, Chart_Item_old,
+    Device_Item,
+    Device_Item_Group,
+    DIG_Param,
+    DIG_Param_Value_Type,
+    Save_Algorithm,
+    Section, Chart, Axis_Params, Saved_User_Chart, Chart_Item_Config
+} from '../../../scheme';
 import {SchemeService} from '../../../scheme.service';
 import {ColorPickerDialog, Hsl} from '../color-picker-dialog/color-picker-dialog';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
@@ -70,11 +88,12 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
     time_from = '00:00:00';
     date_to = new FormControl(moment());
     time_to = '23:59:59';
-    user_chart: Chart;
+    user_chart: Chart_old | Saved_User_Chart;
     itemList = [];
-    selected_charts: Chart_Params[] = [];
+    selected_chart: Chart_Params;
+    axes: Axis_Params[] = [];
     settings: any = {};
-    user_charts: Chart[] = [];
+    user_charts: (Chart_old | Saved_User_Chart)[] = [];
 
     paramList: Select_Item_Iface[] = [];
     paramSettings: any = {};
@@ -83,6 +102,8 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
 
     private selectedItems_ = [];
     private paramSelected_: Select_Item_Iface[] = [];
+    draggingDataset: boolean;
+    private draggingDatasetTo:  Axis_Params;
 
     get selectedItems() {
         return this.selectedItems_;
@@ -164,13 +185,14 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         }
     }
 
-    OnChartsType(user_chart: Chart = undefined): void {
+    OnChartsType(user_chart: Chart_old | Saved_User_Chart = undefined): void {
         if (user_chart) {
             this.user_chart = {...user_chart};
         } else {
-            this.user_chart = {id: 0, name: ''} as Chart;
+            this.user_chart = {id: 0, name: ''} as Chart_old;
         }
 
+        this.axes = [];
         this.selectedItems = [];
         this.settings = {
             text: '',
@@ -262,7 +284,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.selected_charts = [];
+        this.selected_chart = null;
         switch (this.charts_type) {
             case Chart_Type.CT_USER:
                 this.initDeviceUserDatasets();
@@ -304,73 +326,95 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         });
     }
 
-    initDeviceItemDatasetsImpl(dev_items: Chart_Item_Iface[], params: Chart_Item_Iface[]): void {
-        const dataset_params: ItemWithLegend<any>[] = [];
+    initDeviceItemDatasetsImpl(dev_items: Chart_Item_Iface[], params: Chart_Item_Iface[], axe: Axis_Params): void {
         const sections = this.schemeService.scheme.section;
+
+        const filteredDevItems = dev_items.filter((dev_item) => {
+            return !this.axes.find((axis) => !!axis.datasets.find(item => item.item_id === dev_item.id));
+        });
+
         for (const sct of sections) {
             for (const group of sct.groups) {
                 for (const item of group.items) {
-                    for (const s_item of dev_items) {
+                    for (const s_item of filteredDevItems) {
                         if (s_item.id == item.id) {
-                            ChartFilterComponent.pushToDatasetParams(dataset_params, item);
+                            ChartFilterComponent.pushDatasetToAxe(axe, item, s_item.hsl, false);
+                            // ChartFilterComponent.pushToDatasetParams(dataset_params, item);
                             break;
                         }
                     }
                 }
 
-                this.addParam2Dataset(dataset_params, group.params, params);
+                this.addParam2Axe(axe, group.params, params);
             }
         }
 
-        this.selected_charts.push({
+        this.selected_chart = {
+            axes: this.axes,
             name: this.translate.instant('REPORTS.CHARTS_ELEMENTS'),
-            dataset_params,
-        })
+        };
     }
 
     initDeviceUserDatasets(): void {
-        const user_chart = this.selectedItems[0];
+        const user_chart = this.selectedItems[0] as Chart_old | Saved_User_Chart;
         if (!user_chart) return;
 
-        let items = [];
-        let params = [];
-        for (const it of user_chart.items)
-        {
-            if (it.item_id)
-                items.push({id: it.item_id, hsl: ColorPickerDialog.rgbhex2hsl(it.color)});
-            else
-                params.push({id: it.param_id, hsl: ColorPickerDialog.rgbhex2hsl(it.color)});
-        }
+        if ((<Chart_old>user_chart).items) {
+            this.setupUserChart(<Chart_old>user_chart);
+        } else {
+            const { axes } = <Saved_User_Chart>user_chart;
+            const axisParams: Axis_Params[] = axes.map((axe) => {
+                const axisParam = {
+                    ...axe,
+                    datasets: [],
+                };
 
-        this.initDeviceItemDatasetsImpl(items, params);
-        this.copyParamsFromUserChart(user_chart);
+                const items: Chart_Item_Iface[] = [];
+                const params: Chart_Item_Iface[] = [];
+                axe.datasets.forEach((ds) => {
+                    if (ds.isParam) {
+                        params.push({ id: ds.param_id, hsl: ds.extra.color });
+                    } else {
+                        items.push({ id: ds.item_id, hsl: ds.extra.color });
+                    }
+                });
+
+                this.initDeviceItemDatasetsImpl(items, params, axisParam);
+
+                return axisParam;
+            });
+
+            this.axes = axisParams;
+        }
     }
 
     initDeviceItemDatasets(): void {
         const items = this.selectedItems.map(it => { return {id: it.id, hsl: null}; });
         const params = this.paramSelected.map(it => { return {id: it.id, hsl: null}; });
-        this.initDeviceItemDatasetsImpl(items, params);
+        this.initDeviceItemDatasetsImpl(items, params, this.getCurrentAxis());
     }
 
     initDigTypeDatasets(): void {
         const params = this.get_dig_param_ids(this.paramSelected);
         const sections = this.schemeService.scheme.section;
+
+        const [itemAxis, paramAxis] = this.getDigAxes();
+
         for (const sct of sections) {
             for (const group of sct.groups) {
                 if (group.type_id === this.selectedItems[0].id) {
-                    const dataset_params: ItemWithLegend<Device_Item>[] = [];
-
                     for (const item of group.items) {
                         if (item.type.save_algorithm > Save_Algorithm.SA_OFF) {
-                            ChartFilterComponent.pushToDatasetParams(dataset_params, item);
+                            ChartFilterComponent.pushDatasetToAxe(itemAxis, item, null, false);
                         }
                     }
 
-                    this.addParam2Dataset(dataset_params, group.params, params);
-                    this.selected_charts.push({
+                    this.addParam2Axe(paramAxis, group.params, params);
+
+                    this.selected_chart = {
                         name: sct.name,
-                        dataset_params,
-                    });
+                        axes: this.axes,
+                    };
                     break;
                 }
             }
@@ -420,17 +464,21 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         return res;
     }
 
-    addParam2Dataset(datasets: ItemWithLegend<any>[], params: DIG_Param[], selected: Chart_Item_Iface[]): void {
+    addParam2Axe(axe:  Axis_Params, params: DIG_Param[], selected: Chart_Item_Iface[]): void {
+        const filtered = selected.filter((param) => {
+            return !this.axes.find((axis) => !!axis.datasets.find(item => item.param_id === param.id));
+        });
         for (const param of params) {
-            for (const s_pt of selected) {
+            for (const s_pt of filtered) {
                 if (s_pt.id === param.id) {
-                    ChartFilterComponent.pushToDatasetParams(datasets, param, true);
+                    ChartFilterComponent.pushDatasetToAxe(axe, param, s_pt.hsl, true);
+                    // ChartFilterComponent.pushToDatasetParams(datasets, param, true);
                     break;
                 }
             }
 
             if (param.childs)
-                this.addParam2Dataset(datasets, param.childs, selected);
+                this.addParam2Axe(axe, param.childs, selected);
         }
     }
 
@@ -546,8 +594,9 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
             return false;
         });
 
-        this.rebuild();
-        this.copyParamsFromUserChart(user_chart, true);
+        this.selected_chart = null;
+        this.axes = [];
+        this.setupUserChart(user_chart, true);
         this.buildChart();
     }
 
@@ -560,56 +609,58 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
             return;
         }
 
-        let user_chart = new Chart;
-        user_chart.id = this.user_chart.id;
-        user_chart.name = this.user_chart.name;
-        user_chart.items = [];
+        const axes = this.axes.map((axe) => {
+            const datasets: Chart_Item_Config[] = axe.datasets
+                .map(({ item_id, param_id, isParam, extra: { color, hidden }}) => ({
+                    item_id, param_id, isParam,
+                    extra: {
+                        hidden,
+                        color,
+                    },
+                }));
 
-        for (const item of this.selected_charts[0].dataset_params) {
-            let item_id = null;
-            let param_id = null;
-            let extra: Chart_Item['extra'] = null;
+            const { id, isRight, stepped, display, from, to, order } = axe;
 
-            if (item.isParam) {
-                param_id = item.item.id;
-            } else {
-                item_id = item.item.id;
-            }
-
-            if (item.legend) {
-                const { scale, color } = item.legend;
-                extra = {
-                    color: ColorPickerDialog.hsl2RgbStr(color),
-                    axis_params: scale,
-                } as Chart_Item['extra'];
-            }
-
-            const chart_item: Chart_Item = {
-                extra,
-                item_id,
-                param_id,
+            return {
+                id,
+                datasets,
+                isRight,
+                stepped,
+                display,
+                from,
+                to,
+                order,
             };
-            user_chart.items.push(chart_item);
-        }
-
-        this.schemeService.save_chart(user_chart).subscribe(new_chart => {
-            let found = false;
-            for (let chart of this.user_charts) {
-                if (chart.id === new_chart.id) {
-                    chart.name = new_chart.name;
-                    chart.items = new_chart.items;
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                this.user_charts.push(new_chart);
-            }
-
-            const idx = this.user_charts.findIndex(chart => chart.id === new_chart.id);
-            this.selectUserChart(this.user_charts[idx]);
         });
+
+        const userChart = new Saved_User_Chart();
+        userChart.id = this.user_chart.id;
+        userChart.name = this.user_chart.name;
+        userChart.axes = axes;
+
+        this.schemeService.save_chart(userChart)
+            .subscribe((new_chart) => {
+                let needAdd = true;
+                const foundChartIdx = this.user_charts.findIndex(chart => chart.id === new_chart.id);
+                if (foundChartIdx >= 0) {
+                    const foundChart = this.user_charts[foundChartIdx];
+                    if ((<Saved_User_Chart>foundChart).axes) {
+                        foundChart.name = new_chart.name;
+                        (<Saved_User_Chart>foundChart).axes = new_chart.axes;
+                        needAdd = false;
+                    } else {
+                        this.user_charts.splice(foundChartIdx, 1);
+                    }
+                }
+
+                if (needAdd) { // make chart instanceof Saved_User_Chart
+                    const chart = new Saved_User_Chart();
+                    chart.id = new_chart.id;
+                    chart.name = new_chart.name;
+                    chart.axes = new_chart.axes;
+                    this.user_charts.push(chart);
+                }
+            });
     }
 
     del_user_chart(): void {
@@ -640,7 +691,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
             data: {
                 timeFrom: parseDate(this.date_from, this.time_from),
                 timeTo: parseDate(this.date_to, this.time_to),
-                selected_charts: this.selected_charts,
+                selected_chart: this.selected_chart,
                 user_chart: this.user_chart,
                 user_charts: this.user_charts,
                 charts_type: this.charts_type,
@@ -663,35 +714,32 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         }
 
         if (action.type === 'chart_axes') {
-            this.selected_charts[0].dataset_params.forEach((dsp) => {
-                const axe = action.data.axes.find(axe => axe.id === dsp.item.id && axe.isParam === dsp.isParam);
-
-                dsp.legend.scale.from = axe.from;
-                dsp.legend.scale.to = axe.to;
-                dsp.legend.scale.isRight = axe.isRight;
-                dsp.legend.stepped = axe.stepped;
-                // dsp.legend.scale.display = axe.display;
+            (<BuiltChartParams>action.data).axes.forEach((axe) => {
+                const foundAxis = this.axes.find(a => a.id === axe.id);
+                foundAxis.from = axe.from;
+                foundAxis.to = axe.to;
+                foundAxis.display = axe.display;
             });
         }
     }
 
-    openColorPicker(chart_params: Chart_Params, dataset: ItemWithLegend<any>): void {
+    openColorPicker(dataset: Chart_Item): void {
         const dialogRef = this.dialog.open(ColorPickerDialog, {
             width: '450px',
-            data: {dataset, chart_params}
+            data: { dataset },
         });
 
         dialogRef.afterClosed().subscribe(hsl => {
             if (hsl !== undefined && hsl !== null)
             {
-                dataset.legend.color = hsl;
+                dataset.extra.color = hsl;
                 this.dataset_legend_updated(dataset);
             }
         });
     }
 
-    toggleDatasetVisibility(dataset: ItemWithLegend<any>): void {
-        dataset.legend.hidden = !dataset.legend.hidden;
+    toggleDatasetVisibility(dataset: Chart_Item): void {
+        dataset.extra.hidden = !dataset.extra.hidden;
         this.dataset_legend_updated(dataset);
     }
 
@@ -723,9 +771,9 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         return hash;
     }
 
-    private dataset_legend_updated(dataset: ItemWithLegend<any>) {
-        const hsl = dataset.legend.color;
-        dataset.legend.displayColor = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+    private dataset_legend_updated(dataset: Chart_Item) {
+        const hsl = dataset.extra.color;
+        dataset.extra.displayColor = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
 
         this.sidebar.performActionToContent({
             type: 'legend_updated',
@@ -733,49 +781,27 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         });
     }
 
-    toggleLegendModal(ds: ItemWithLegend<any>) {
-        ds.showModal = !ds.showModal;
+    toggleLegendModal(axe: Axis_Config) {
+        axe.showModal = !axe.showModal;
 
-        if (ds.showModal) {
+        if (axe.showModal) {
             return;
         }
 
         // Process inputted values if modal closed
-        const { scale } = ds.legend;
-        if (scale) {
-            if (scale.from && typeof scale.from === 'string') {
-                scale.from = parseFloat(scale.from);
+        if (axe) {
+            if (axe.from && typeof axe.from === 'string') {
+                axe.from = parseFloat(axe.from);
             }
 
-            if (scale.to && typeof scale.to === 'string') {
-                scale.to = parseFloat(scale.to);
+            if (axe.to && typeof axe.to === 'string') {
+                axe.to = parseFloat(axe.to);
             }
 
-            if (scale.order && typeof scale.order === 'string') {
-                scale.order = parseInt(scale.order, 10);
+            if (axe.order && typeof axe.order === 'string') {
+                axe.order = parseInt(axe.order, 10);
             }
         }
-    }
-
-    private copyParamsFromUserChart(user_chart: Chart, displayAuto: boolean = false) {
-        user_chart.items.forEach((axeItem: Chart_Item) => {
-            const datasetItem = this.selected_charts[0].dataset_params
-                .find(dsItem => dsItem.isParam ? axeItem.param_id === dsItem.item.id : axeItem.item_id === dsItem.item.id);
-
-            const hsl = ColorPickerDialog.rgbhex2hsl(axeItem.extra.color);
-            const { h, s, l } = hsl;
-            const legendPatch = {
-                scale: axeItem.extra.axis_params,
-                color: hsl,
-                displayColor: `hsl(${h}, ${s}%, ${l}%)`,
-                hidden: false,
-            };
-            if (displayAuto) {
-                legendPatch.scale.display = 'auto';
-            }
-
-            Object.assign(datasetItem.legend, legendPatch);
-        });
     }
 
     private fetchUserCharts() {
@@ -795,7 +821,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         });
     }
 
-    private selectUserChart(chart: Chart) {
+    private selectUserChart(chart: Chart_old | Saved_User_Chart) {
         this.charts_type = Chart_Type.CT_USER;
 
         this.selectedItems = [];
@@ -803,5 +829,188 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
 
         this.OnChartsType(chart);
         this.buildChart();
+    }
+
+    addAxis() {
+        let id;
+        let maxOrder;
+
+        if (this.axes.length === 0) {
+            id = 'A';
+            maxOrder = 0;
+        } else {
+            const letter = this.axes
+                .map(axe => axe.id)
+                .reduce((prev, curr) => prev > curr ? prev : curr);
+            id = String.fromCharCode(letter.charCodeAt(0) + 1);
+
+            maxOrder = this.axes
+                .map(axe => +axe.order)
+                .reduce((prev, curr) => prev > curr ? prev : curr);
+        }
+
+        const axe:  Axis_Params = {
+            id,
+            isRight: false,
+            stepped: false,
+            display: 'auto',
+            from: -50,
+            to: 50,
+            order: maxOrder,
+            showModal: false,
+            datasets: [],
+        };
+
+        this.axes.push(axe);
+        return axe;
+    }
+
+    private findAxisById(id: string): Axis_Params {
+        return this.axes.find((axis) => axis.id === id);
+    }
+
+    private getDigAxes(): Axis_Params[] {
+        if (this.charts_type === Chart_Type.CT_DIG_TYPE) {
+            if (this.axes.length !== 2) {
+                this.axes = [];
+
+                this.addAxis(); // for item default
+                this.addAxis(); // for param
+
+                const [item, param] = this.axes;
+                param.stepped = true;
+                param.from = -1;
+                param.to = 2;
+                param.isRight = true;
+            }
+
+            return this.axes;
+        }
+
+        throw new Error('Method allowed only when charts_type is CT_DIG_TYPE');
+    }
+
+    private getCurrentAxis() {
+        if (this.axes.length === 0) {
+            this.addAxis();
+        }
+
+        return this.axes[this.axes.length - 1];
+    }
+
+    private static pushDatasetToAxe(
+        axe:  Axis_Params,
+        item: Device_Item | DIG_Param,
+        color: Hsl,
+        isParam: boolean
+    ) {
+        if (!color) {
+            const title = (<Device_Item>item).type?.title || (<DIG_Param>item).param?.title;
+            color = ChartFilterComponent.getColorByIndex(axe.datasets.length, title);
+        }
+
+        axe.datasets.push({
+            item_id: !isParam ? item.id : null,
+            param_id: isParam ? item.id : null,
+            item,
+            isParam,
+            extra: {
+                color,
+                displayColor: `hsl(${color.h}, ${color.s}%, ${color.l}%)`,
+                hidden: false,
+            },
+        });
+    }
+
+    datasetDrag($event: DragEvent) {
+        $event.preventDefault();
+
+        this.draggingDataset = true;
+        $event.dataTransfer.dropEffect = 'move';
+    }
+
+    datasetDragEnd($event: DragEvent, ds: Chart_Item, from: Axis_Config & {datasets: Chart_Item[]}) {
+        $event.preventDefault();
+
+        this.draggingDataset = false;
+        if (this.draggingDatasetTo) {
+            const idx = from.datasets.indexOf(ds);
+            from.datasets.splice(idx, 1);
+
+            this.draggingDatasetTo.datasets.push(ds);
+            this.draggingDatasetTo = null;
+        }
+    }
+
+    dragover($event: DragEvent, axe:  Axis_Params) {
+        $event.preventDefault();
+
+        this.draggingDatasetTo = axe;
+        axe.allowDragOver = true;
+    }
+
+    dragleave($event: DragEvent, axe:  Axis_Params) {
+        $event.preventDefault();
+
+        axe.allowDragOver = false;
+        this.draggingDatasetTo = null;
+    }
+
+    private setupUserChart(user_chart: Chart_old, displayAuto: boolean = false) {
+        let itemsPerAxis: Record<string, Chart_Item_Iface[]> = {};
+        let paramsPerAxis: Record<string, Chart_Item_Iface[]> = {};
+
+        for (const it of user_chart.items) {
+            const scale = it.extra.axis_params;
+            let axis = this.axes.find(axis => axis.from === scale.from
+                && axis.to === scale.to
+                && axis.isRight === scale.isRight
+                && axis.display === scale.display
+                && axis.stepped === scale.stepped
+            );
+
+            if (!axis) {
+                if (scale.from || scale.to) {
+                    // create and assign new axis if valid params
+                    axis = this.addAxis();
+                    axis.isRight = scale.isRight;
+                    axis.from = scale.from;
+                    axis.to = scale.to;
+                    axis.display = scale.display;
+                    axis.stepped = scale.stepped;
+                } else {
+                    // assign previous if one or more exist
+                    if (this.axes.length > 0) {
+                        axis = this.axes[this.axes.length - 1];
+                    } else {
+                        axis = this.addAxis();
+                    }
+                }
+            }
+
+            if (displayAuto) {
+                axis.display = 'auto';
+            }
+
+            if (it.item_id) {
+                itemsPerAxis[axis.id] ??= [];
+                itemsPerAxis[axis.id].push({id: it.item_id, hsl: ColorPickerDialog.rgbhex2hsl(it.extra.color)});
+            } else {
+                paramsPerAxis[axis.id] ??= [];
+                paramsPerAxis[axis.id].push({id: it.param_id, hsl: ColorPickerDialog.rgbhex2hsl(it.extra.color)});
+            }
+        }
+
+        let keys = Object.keys(itemsPerAxis);
+        const filteredParamKeys = Object.keys(paramsPerAxis).filter(paramKey => keys.indexOf(paramKey) === -1);
+        keys = keys.concat(filteredParamKeys);
+
+        keys.forEach((key) => {
+                const items = itemsPerAxis[key] || [];
+                const params = paramsPerAxis[key] || [];
+                const axis = this.findAxisById(key);
+
+                this.initDeviceItemDatasetsImpl(items, params, axis);
+            });
     }
 }

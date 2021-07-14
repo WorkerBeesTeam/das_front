@@ -1,4 +1,4 @@
-import {Chart, Axis_Params, Device_Item, DIG_Param} from '../../scheme';
+import {Chart_old, Axis_Config, Device_Item, DIG_Param, Chart_Item, Axis_Params} from '../../scheme';
 import {Hsl} from './color-picker-dialog/color-picker-dialog';
 import * as ChartJs from 'chart.js';
 import {ChartOptions} from 'chart.js';
@@ -40,7 +40,7 @@ export interface Legend_Options {
     stepped: boolean;
     hidden: boolean;
 
-    scale: Omit<Axis_Params, 'id'>;
+    scale: Omit<Axis_Config, 'id'>;
 }
 
 export interface ItemWithLegend<T> {
@@ -54,14 +54,14 @@ export interface ItemWithLegend<T> {
 
 export interface Chart_Params {
     name: string;
-    dataset_params: ItemWithLegend<any>[],
+    axes: Axis_Params[];
 }
 
 export interface ChartFilter extends TimeFilter {
-    user_chart: Chart;
-    user_charts: Chart[];
+    user_chart: Chart_old;
+    user_charts: Chart_old[];
 
-    selected_charts?: Chart_Params[];
+    selected_chart?: Chart_Params;
 
     charts_type: Chart_Type;
     data_part_size: number;
@@ -75,7 +75,7 @@ export interface ZoomInfo extends TimeFilter {
 }
 
 export interface BuiltChartParams {
-    axes: Axis_Params[];
+    axes: Axis_Config[];
     datasets: any[];
 }
 

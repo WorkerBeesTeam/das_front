@@ -134,3 +134,8 @@ fieldset.chart_type {
 .legend__item-label div > * {
     flex: 1 1;
 }
+
+.dragging.allow-drag-over.legend-container,
+.dragging.legend-container:hover {
+    background-color: #C0C0C0;
+}

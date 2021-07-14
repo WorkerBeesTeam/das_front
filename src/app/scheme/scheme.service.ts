@@ -6,14 +6,14 @@ import {Observable, of} from 'rxjs';
 import {catchError, flatMap, switchMap, tap} from 'rxjs/operators';
 
 import {
-    Chart,
+    Chart_old,
     Device,
     Device_Item,
     Device_Item_Group, Device_Item_Type,
     DIG_Param,
     DIG_Param_Type, DIG_Type,
     Disabled_Status,
-    Help, Mnemoscheme, Plugin_Type,
+    Help, Mnemoscheme, Plugin_Type, Saved_User_Chart,
     Scheme_Detail,
     Section,
     Time_Info,
@@ -425,12 +425,12 @@ export class SchemeService extends ISchemeService {
             .catch(error => Observable.throw(error));
     }
 
-    get_charts(): Observable<Chart[]> {
+    get_charts(): Observable<Chart_old[]> {
         let url = this.url('chart');
-        return this.getPiped<Chart[]>(url, `fetched chart list`, 'get_charts', []);
+        return this.getPiped<Chart_old[]>(url, `fetched chart list`, 'get_charts', []);
     }
 
-    del_chart(chart: Chart): Observable<boolean> {
+    del_chart(chart: Chart_old): Observable<boolean> {
         const url = `/api/v2/scheme/${this.scheme.parent_id || this.scheme.id}/chart/${chart.id}/`;
         return this.http.delete<any>(url).pipe(
             switchMap(resp => of(resp.result)),
@@ -440,12 +440,15 @@ export class SchemeService extends ISchemeService {
             }));
     }
 
-    save_chart(chart: Chart): Observable<Chart> {
+    save_chart(chart: Saved_User_Chart): Observable<Saved_User_Chart> {
         const url = `/api/v2/scheme/${this.scheme.parent_id || this.scheme.id}/chart/`;
-        return this.http.put<any>(url, chart).catch((err: HttpErrorResponse) => {
-            alert(err.error + '\n' + err.message);
-            return of(null as Chart);
-        });
+        return this.http.put<any>(url, chart)
+            .pipe(
+                catchError((err: HttpErrorResponse) => {
+                        alert(err.error + '\n' + err.message);
+                        return of(null as Saved_User_Chart);
+                    }),
+            );
     }
 
     getChartData(date_from: number, date_to: number, data: string, limit: number = 1000, offset: number = 0, data_type: string = 'value', bounds_only: boolean = false): Observable<Paginator_Chart_Value> {

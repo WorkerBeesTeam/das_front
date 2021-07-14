@@ -1,53 +1,65 @@
 <div class="chart_conf">
     <div class="chart_type">
-        <div class="legend-container" *ngFor="let chart of selected_charts">
-            <p>{{ chart.name }}</p>
+        <div class="legend-container"
+             *ngFor="let axe of selected_chart?.axes"
+             [class.dragging]="draggingDataset"
+             [class.allow-drag-over]="axe.allowDragOver"
+             (dragover)="dragover($event, axe)"
+             (dragleave)="dragleave($event, axe)"
+        >
+<!--            <p></p>-->
+            <div class="legend__item-axis"
+                 *ngIf="charts_type == chartType.CT_DEVICE_ITEM"
+            >
+                {{ axe.id }}
+                <button (click)="toggleLegendModal(axe)">
+                    <mat-icon>{{ axe.showModal ? 'close' : 'settings' }}</mat-icon>
+                </button>
+                <div class="legend__item-axis-modal" *ngIf="axe.showModal">
+                    <div><label for="axisFromInput" i18n="@@REPORTS.AXIS_FROM">От</label><input id="axisFromInput" type="text" [(ngModel)]="axe.from"></div>
+                    <div><label for="axisToInput" i18n="@@REPORTS.AXIS_TO">До</label><input id="axisToInput" type="text" [(ngModel)]="axe.to"></div>
+                    <div style="justify-content: space-around;">
+                        <label i18n="@@REPORTS.AXIS_LEFT">Слева</label>
+                        <mat-slide-toggle [(ngModel)]="axe.isRight"></mat-slide-toggle>
+                        <label i18n="@@REPORTS.AXIS_RIGHT">Справа</label>
+                    </div>
+                    <div>
+                        <label for="axisOrderInput" i18n="@@REPORTS.AXIS_ORDER">Порядок</label>
+                        <input id="axisOrderInput" type="text" [(ngModel)]="axe.order">
+                    </div>
+                    <div>
+                        <label i18n="@@REPORTS.STEPPED">Прямоугольный</label>
+                        <mat-slide-toggle [(ngModel)]="axe.stepped"></mat-slide-toggle>
+                    </div>
+                    <div>
+                        <label i18n="@@REPORTS.SHOW_AXIS">Отображать шкалу</label>
+                        <mat-slide-toggle
+                            [ngModel]="axe.display === 'auto'"
+                            (ngModelChange)="axe.display = $event ? 'auto' : false"
+                        ></mat-slide-toggle>
+                    </div>
+                </div>
+            </div>
             <div class="legend">
-                <div class="legend__item" *ngFor="let ds of chart.dataset_params">
+                <div class="legend__item" *ngFor="let ds of axe.datasets"
+                     draggable="true"
+                     (drag)="datasetDrag($event)"
+                     (dragend)="datasetDragEnd($event, ds, axe)"
+                >
                     <div class="legend__item-label"
-                         [style.text-decoration]="ds.legend.hidden ? 'line-through' : 'inherit'"
+                         [style.text-decoration]="ds.extra?.hidden ? 'line-through' : 'inherit'"
                          (click)="toggleDatasetVisibility(ds)"
                     >
                         <div class="legend__item-color"
-                             [style.background-color]="ds.legend.displayColor"
-                             (click)="$event.stopPropagation();openColorPicker(chart, ds)"
+                             [style.background-color]="ds.extra?.displayColor"
+                             (click)="$event.stopPropagation();openColorPicker(ds)"
                         ></div>
                         {{ ds.item.param?.title || ds.item.type?.title }}
-                    </div>
-                    <div class="legend__item-axis"
-                         *ngIf="charts_type == chartType.CT_DEVICE_ITEM"
-                    >
-                        <button (click)="toggleLegendModal(ds)">
-                            <mat-icon>{{ ds.showModal ? 'close' : 'settings' }}</mat-icon>
-                        </button>
-                        <div class="legend__item-axis-modal" *ngIf="ds.showModal">
-                            <div><label for="axisFromInput" i18n="@@REPORTS.AXIS_FROM">От</label><input id="axisFromInput" type="text" [(ngModel)]="ds.legend.scale.from"></div>
-                            <div><label for="axisToInput" i18n="@@REPORTS.AXIS_TO">До</label><input id="axisToInput" type="text" [(ngModel)]="ds.legend.scale.to"></div>
-                            <div style="justify-content: space-around;">
-                                <label i18n="@@REPORTS.AXIS_LEFT">Слева</label>
-                                <mat-slide-toggle [(ngModel)]="ds.legend.scale.isRight"></mat-slide-toggle>
-                                <label i18n="@@REPORTS.AXIS_RIGHT">Справа</label>
-                            </div>
-                            <div>
-                                <label for="axisOrderInput" i18n="@@REPORTS.AXIS_ORDER">Порядок</label>
-                                <input id="axisOrderInput" type="text" [(ngModel)]="ds.legend.scale.order">
-                            </div>
-                            <div>
-                                <label i18n="@@REPORTS.STEPPED">Прямоугольный</label>
-                                <mat-slide-toggle [(ngModel)]="ds.legend.stepped"></mat-slide-toggle>
-                            </div>
-                            <div>
-                                <label i18n="@@REPORTS.SHOW_AXIS">Отображать шкалу</label>
-                                <mat-slide-toggle
-                                    [ngModel]="ds.legend.scale.display === 'auto'"
-                                    (ngModelChange)="ds.legend.scale.display = $event ? 'auto' : false"
-                                ></mat-slide-toggle>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div *ngIf="charts_type === chartType.CT_DEVICE_ITEM"><button (click)="addAxis()">Add axis</button></div>
 
         <div class="time-filter">
             <mat-form-field class="chart-time">

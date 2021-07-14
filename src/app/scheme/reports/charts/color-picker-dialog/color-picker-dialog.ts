@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject, ViewChild, ElementRef } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import {Chart_Params, ItemWithLegend} from '../chart-types';
+import {Chart_Params} from '../chart-types';
+import {Chart_Item} from '../../../scheme';
 
 export interface Hsl {
     h: number;
@@ -15,8 +16,7 @@ export interface Rgb {
 }
 
 export interface DialogData {
-  chart_params: Chart_Params;
-  dataset: ItemWithLegend<any>;
+  dataset: Chart_Item<any>;
 }
 
 @Component({
@@ -52,7 +52,7 @@ export class ColorPickerDialog implements OnInit {
         this.ctx = this.canvas.getContext('2d');
         this.draw();
 
-        this.color = this.data.dataset.legend.displayColor;
+        this.color = this.data.dataset.extra.displayColor;
         this.cur = this.findColor(this.color);
         if (this.cur)
         {

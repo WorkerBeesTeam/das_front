@@ -27,7 +27,7 @@ import * as Chart from 'chart.js';
 
 import zoomPlugin from 'chartjs-plugin-zoom';
 import 'chartjs-adapter-moment';
-import {Axis_Params} from '../../../scheme';
+import {Axis_Config} from '../../../scheme';
 import {ChartOptions} from 'chart.js';
 import {ScaleWithLegendBox} from './scale-with-legend-box';
 
@@ -48,8 +48,25 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
             type: 'LinearWithLegend',
             position: 'left',
             display: 'auto',
+            title: {
+                display: true,
+                text: `      A      `,
+                align: 'start',
+                padding: { top: 5, bottom: -9 },
+            },
+            bounds: 'ticks',
+            beginAtZero: false,
+            offset: false,
+            min: -50,
+            max: 50,
+            grid: {
+                display: true,
+                drawTicks: false,
+            },
             ticks: {
                 backdropPadding: 0,
+                padding: 2,
+                callback: val => Math.round(val),
             },
         },
         B: {
@@ -57,12 +74,29 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
             type: 'LinearWithLegend',
             position: 'right',
             display: 'auto',
+            title: {
+                display: true,
+                text: `      B      `,
+                align: 'start',
+                padding: { top: 5, bottom: -9 },
+            },
+            bounds: 'ticks',
+            beginAtZero: false,
+            offset: false,
+            min: -50,
+            max: 50,
+            grid: {
+                display: true,
+                drawTicks: false,
+            },
             ticks: {
                 max: 2,
                 min: -1,
                 stepSize: 1,
                 suggestedMin: 0,
                 suggestedMax: 1,
+                padding: 2,
+                callback: val => Math.round(val),
             },
         },
     };
@@ -204,7 +238,19 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
             this.setupYAxisScale(this.leftYAxisLsKey, 'A');
             this.setupYAxisScale(this.rightYAxisLsKey, 'B');
         } else {
-            Object.assign(this.chartOptions.options.scales, this.yAxes || this.defaultYAxes_);
+            Object.keys(this.yAxes || this.defaultYAxes_)
+                .forEach((key) => {
+                    const left = this.chartOptions.options.scales[key];
+                    const right = (this.yAxes || this.defaultYAxes_)[key];
+                    if (left && right) {
+                        Object.assign(
+                            this.chartOptions.options.scales[key],
+                            (this.yAxes || this.defaultYAxes_)[key],
+                        );
+                    } else if (right) {
+                        this.chartOptions.options.scales[key] = right;
+                    }
+                });
         }
     }
 
@@ -343,7 +389,6 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
     setDataColor(dataset: any, hsl: Hsl): void
     {
         const hslStr = `${hsl.h}, ${hsl.s}%, ${hsl.l}%`;
-        console.log(hsl, hslStr);
         dataset.borderColor = `hsl(${hslStr}`;
         dataset.backgroundColor = `hsla(${hslStr},0.5)`;
         dataset.pointBorderColor = `hsla(${hslStr},0.7)`;
@@ -452,7 +497,7 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
         }));
     }
 
-    private getAxes(): Axis_Params[] {
+    private getAxes(): Axis_Config[] {
         return Object.keys(this.chart.scales)
             .map((key) => {
                 const scaleItem = this.chart.scales[key];

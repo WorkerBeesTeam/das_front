@@ -7,7 +7,7 @@ import {combineLatest, of, SubscriptionLike, timer} from 'rxjs';
 import * as _moment from 'moment';
 import {default as _rollupMoment} from 'moment';
 import {Chart_Value_Item, Paginator_Chart_Value, SchemeService} from '../../scheme.service';
-import {Axis_Params, Device_Item, DIG_Param, Register_Type} from '../../scheme';
+import {Axis_Config, Chart_Item, Device_Item, DIG_Param, Register_Type} from '../../scheme';
 import {Scheme_Group_Member} from '../../../user';
 import {BuiltChartParams, Chart_Info_Interface, Chart_Type, ChartFilter, ItemWithLegend, ZoomInfo} from './chart-types';
 import {ChartItemComponent} from './chart-item/chart-item.component';
@@ -119,7 +119,7 @@ export class ChartsComponent implements OnDestroy {
     private initCharts(chartFilter: ChartFilter): void {
         this.chartFilter = chartFilter;
 
-        if (!this.chartFilter.selected_charts?.length) {
+        if (!this.chartFilter.selected_chart) {
             console.warn('Init charts failed', this.chartFilter.charts_type, this.chartFilter.selectedItems);
             return;
         }
@@ -128,73 +128,48 @@ export class ChartsComponent implements OnDestroy {
 
         let data_ptr = {dev_items: [], params: []};
 
-        const a = 'A'.charCodeAt(0);
-        const enableUserAxes = this.chartFilter.charts_type !== Chart_Type.CT_DIG_TYPE;
+        const chart = this.chartFilter.selected_chart;
 
-        this.chartFilter.selected_charts?.forEach(chart => {
-            const axes: Axis_Params[] = [];
+        let chartDatasets = [];
 
-            const datasets = chart.dataset_params.map((ds_param) => {
-                const {item, legend: {color, idx, scale, hidden, stepped}} = ds_param;
+        chart.axes.forEach((axe) => {
+            const { stepped, id } = axe;
+            const datasets = axe.datasets.map((ds_param) => {
+                const { item, extra: { color, hidden } } = ds_param;
 
                 let dataset: Chart.ChartDataset<'line'>;
                 if (ds_param.isParam) {
-                    dataset = this.genParamDataset(item, idx, color, hidden, stepped);
+                    dataset = this.genParamDataset(item as DIG_Param, color, hidden, stepped);
                     data_ptr.params.push(item.id);
                 } else {
-                    dataset = this.genDevItemDataset(item, idx, color, hidden, stepped);
+                    dataset = this.genDevItemDataset(item as Device_Item, color, hidden, stepped);
                     data_ptr.dev_items.push(item.id);
                 }
-
-                if (enableUserAxes) {
-                    let yAxisID;
-                    const existingAxis = axes.find(axis => axis.from === scale.from
-                        && axis.to === scale.to
-                        && axis.isRight === scale.isRight
-                        && axis.display === scale.display
-                    );
-
-                    if (!existingAxis) {
-                        if (scale.from || scale.to) {
-                            // create and assign new axis if valid params
-                            yAxisID = String.fromCharCode(a + axes.length);
-                            axes.push({
-                                id: yAxisID,
-                                ...scale,
-                            });
-                        } else if (axes.length > 0) {
-                            // assign previous if one or more exist
-                            yAxisID = axes[axes.length - 1]?.id;
-                        }
-                    } else {
-                        // assign found
-                        yAxisID = existingAxis.id;
-                    }
-
-                    // overwrite yAxisID if found/assigned
-                    yAxisID && (dataset.yAxisID = yAxisID);
-                }
+                dataset.yAxisID = id;
 
                 return dataset;
             });
-
-            if (enableUserAxes) {
-                axes.sort((a, b) => <number>a.order - <number>b.order);
-                const chartAxes = axes.reduce((r, axe) => {
-                    r[axe.id] = ChartsComponent.genAxis(
-                        axe.id,
-                        axe.isRight ? 'right' : 'left',
-                        +axe.from,
-                        +axe.to,
-                        axe.display,
-                    );
-                    return r;
-                }, {});
-                this.addChart(chart.name, datasets, chartAxes);
-            } else {
-                this.addChart(chart.name, datasets);
-            }
+            chartDatasets = datasets.concat(chartDatasets);
         });
+
+        // if (enableUserAxes) {
+        chart.axes.sort((a, b) => <number>a.order - <number>b.order);
+        const chartAxes = chart.axes.reduce((r, axe) => {
+            const { id, from, to, display, isRight } = axe;
+            r[id] = ChartsComponent.genAxis(
+                id,
+                isRight ? 'right' : 'left',
+                +from,
+                +to,
+                display,
+            );
+            return r;
+        }, {});
+
+        this.addChart(chart.name, chartDatasets, chartAxes);
+        // } else {
+        //     this.addChart(chart.name, datasets);
+        // }
 
         this.sidebarService.performActionToSidebar({
             type: 'charts',
@@ -357,7 +332,7 @@ export class ChartsComponent implements OnDestroy {
         return date_str + time;
     }
 
-    genDevItemDataset(item: Device_Item, colorIndex: number, hsl: Hsl = null, hidden: boolean, stepped: boolean): Chart.ChartDataset<'line'> {
+    genDevItemDataset(item: Device_Item, hsl: Hsl = null, hidden: boolean, stepped: boolean): Chart.ChartDataset<'line'> {
         const label = item.name.length ? item.name : item.type.title;
 
         if (stepped === null) {
@@ -366,21 +341,21 @@ export class ChartsComponent implements OnDestroy {
             stepped = rt === RT.RT_COILS || rt === RT.RT_DISCRETE_INPUTS;
         }
 
-        let dataset = this.genDataset(label, colorIndex, stepped, hsl, hidden);
+        let dataset = this.genDataset(label, stepped, hsl, hidden);
         dataset['dev_item'] = item;
         return dataset;
     }
 
-    genParamDataset(param: DIG_Param, colorIndex: number, hsl: Hsl = null, hidden: boolean, stepped: boolean): Chart.ChartDataset<'line'> {
+    genParamDataset(param: DIG_Param, hsl: Hsl = null, hidden: boolean, stepped: boolean): Chart.ChartDataset<'line'> {
         if (stepped === null) {
             stepped = true;
         }
-        let dataset = this.genDataset('⚙️ ' + param.param.title, colorIndex, stepped, hsl, hidden);
+        let dataset = this.genDataset('⚙️ ' + param.param.title, stepped, hsl, hidden);
         dataset['param'] = param;
         return dataset;
     }
 
-    genDataset(label: string, colorIndex: number, stepped: boolean = true, hsl: Hsl = null, hidden: boolean): Chart.ChartDataset<'line'> {
+    genDataset(label: string, stepped: boolean = true, hsl: Hsl = null, hidden: boolean): Chart.ChartDataset<'line'> {
         if (hsl.h > 360)
             hsl.h %= 360;
 
@@ -402,7 +377,6 @@ export class ChartsComponent implements OnDestroy {
         min: number,
         max: number,
         display: false | 'auto',
-        step = 1,
         type = 'LinearWithLegend',
     ): LinearScaleOptions & {id: string} {
         const axis: any = {
@@ -410,10 +384,27 @@ export class ChartsComponent implements OnDestroy {
             type,
             position,
             display,
+            title: {
+                display: true,
+                text: `      ${id}      `,
+                align: 'start',
+                padding: { top: 5, bottom: -9 },
+            },
+            bounds: 'ticks',
+            beginAtZero: false,
+            offset: false,
+            grid: {
+                display: true, // TODO: make it configurable (issue #115)
+                drawTicks: false,
+            },
         };
 
         if (min !== null || max !== null) {
-            axis.ticks = {step};
+            axis.ticks = {
+                padding: 2,
+                callback: val => Math.round(val),
+            };
+
             if (min !== null) {
                 axis.min = min;
             }
@@ -581,9 +572,9 @@ export class ChartsComponent implements OnDestroy {
         this.time_to_ext_ = Math.round(this.time_to_ + additional_range);
     }
 
-    private update_dataset_legend_(newDataset: ItemWithLegend<any>) {
+    private update_dataset_legend_(newDataset: Chart_Item) {
         const [chart, dataset] = this.find_dataset(newDataset.isParam ? 'param' : 'dev_item', newDataset.item.id);
-        Object.assign(dataset, ChartsComponent.get_dataset_legend_params_(newDataset.legend.color, newDataset.legend.hidden));
+        Object.assign(dataset, ChartsComponent.get_dataset_legend_params_(newDataset.extra.color, newDataset.extra.hidden));
 
         const chart_item = this.find_chart_item_(chart);
         chart_item.update();
@@ -612,28 +603,9 @@ export class ChartsComponent implements OnDestroy {
     }
 
     private reportChartAxes(chart: Chart_Info_Interface, params: BuiltChartParams) {
-        const axes = chart.data.datasets.map((dataset): Axis_Params & { isParam: boolean } => {
-            const axe = params.axes.find(a => a.id === dataset.yAxisID);
-            const { from, to, isRight, display } = axe as any;
-            if (isRight === undefined || display === undefined || from === undefined || to === undefined) {
-                throw new Error('Bug #111');
-            }
-            return {
-                id: dataset.dev_item?.id || dataset.param?.id,
-                isParam: !dataset.dev_item,
-                isRight,
-                stepped: dataset.stepped,
-
-                from: from.toFixed(2),
-                to: to.toFixed(2),
-                order: axe.order,
-                display,
-            };
-        });
-
         this.sidebarService.performActionToSidebar({
             type: 'chart_axes',
-            data: { axes },
+            data: params,
         });
     }
 }
