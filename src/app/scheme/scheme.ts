@@ -251,7 +251,6 @@ export interface Axis_Config {
     id: string;
 
     isRight: boolean;
-    stepped: boolean;
     display: false | 'auto';
     displayGrid: boolean;
     from: number | string;
@@ -270,6 +269,7 @@ export class Chart_Item_Config {
 
     extra?: {
         hidden: boolean;
+        stepped: boolean;
         color: Hsl;
     };
 }
@@ -292,7 +292,7 @@ export class Chart_Item_old {
     param_id: number;
 
     extra?: {
-        axis_params?: Omit<Axis_Config, "id">
+        axis_params?: Omit<Axis_Config, "id"> & { stepped: boolean };
         color: string;
     };
 }

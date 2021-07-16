@@ -1,7 +1,7 @@
 import {Chart_old, Axis_Config, Device_Item, DIG_Param, Chart_Item, Axis_Params} from '../../scheme';
 import {Hsl} from './color-picker-dialog/color-picker-dialog';
 import * as ChartJs from 'chart.js';
-import {ChartOptions} from 'chart.js';
+import Chart, {ChartOptions} from 'chart.js';
 
 export enum Chart_Type {
     CT_UNKNOWN,
@@ -56,6 +56,6 @@ export interface ZoomInfo extends TimeFilter {
 
 export interface BuiltChartParams {
     axes: Axis_Config[];
-    datasets: any[];
+    datasets: (Chart.ChartDataset<'line'> & { dev_item?: Device_Item, param?: DIG_Param })[];
 }
 

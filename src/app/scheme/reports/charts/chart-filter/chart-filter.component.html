@@ -8,14 +8,13 @@
              (dragleave)="dragleave($event, axe)"
         >
 <!--            <p></p>-->
-            <div class="legend__item-axis"
-                 *ngIf="charts_type == chartType.CT_DEVICE_ITEM"
-            >
+            <div class="legend__item-axis">
                 {{ axe.id }}
-                <button (click)="toggleLegendModal(axe)">
+                <button (click)="toggleLegendModal(axe)" *ngIf="charts_type == chartType.CT_DEVICE_ITEM">
                     <mat-icon>{{ axe.showModal ? 'close' : 'settings' }}</mat-icon>
                 </button>
                 <div class="legend__item-axis-modal" *ngIf="axe.showModal">
+                    <div><label for="axisNameInput" i18n="@@REPORTS.AXIS_ID">Наименование</label><input id="axisNameInput" type="text" [(ngModel)]="axe.id"></div>
                     <div><label for="axisFromInput" i18n="@@REPORTS.AXIS_FROM">От</label><input id="axisFromInput" type="text" [(ngModel)]="axe.from"></div>
                     <div><label for="axisToInput" i18n="@@REPORTS.AXIS_TO">До</label><input id="axisToInput" type="text" [(ngModel)]="axe.to"></div>
                     <div style="justify-content: space-around;">
@@ -26,10 +25,6 @@
                     <div>
                         <label for="axisOrderInput" i18n="@@REPORTS.AXIS_ORDER">Порядок</label>
                         <input id="axisOrderInput" type="text" [(ngModel)]="axe.order">
-                    </div>
-                    <div>
-                        <label i18n="@@REPORTS.STEPPED">Прямоугольный</label>
-                        <mat-slide-toggle [(ngModel)]="axe.stepped"></mat-slide-toggle>
                     </div>
                     <div>
                         <label i18n="@@REPORTS.DISPLAY_GRID">Отображать сетку</label>
@@ -59,6 +54,9 @@
                              (click)="$event.stopPropagation();openColorPicker(ds)"
                         ></div>
                         {{ ds.extra.title }}
+                        <button (click)="$event.stopPropagation();openColorPicker(ds)" *ngIf="charts_type == chartType.CT_DEVICE_ITEM">
+                            <mat-icon>settings</mat-icon>
+                        </button>
                     </div>
                 </div>
             </div>

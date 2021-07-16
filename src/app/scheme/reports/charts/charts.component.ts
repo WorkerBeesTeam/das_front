@@ -133,9 +133,9 @@ export class ChartsComponent implements OnDestroy {
         let chartDatasets = [];
 
         chart.axes.forEach((axe) => {
-            const { stepped, id } = axe;
+            const { id } = axe;
             const datasets = axe.datasets.map((ds_param) => {
-                const { item, extra: { color, hidden } } = ds_param;
+                const { item, extra: { color, hidden, stepped } } = ds_param;
 
                 let dataset: Chart.ChartDataset<'line'>;
                 if (ds_param.isParam) {

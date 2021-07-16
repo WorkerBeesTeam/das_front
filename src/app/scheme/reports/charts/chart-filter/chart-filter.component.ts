@@ -28,6 +28,7 @@ import {MatDialog} from '@angular/material/dialog';
 interface Chart_Item_Iface {
     id: number;
     hsl: Hsl;
+    stepped: boolean;
 }
 
 function parseDate(date: FormControl, time: string): number {
@@ -305,7 +306,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 for (const item of group.items) {
                     for (const s_item of filteredDevItems) {
                         if (s_item.id == item.id) {
-                            ChartFilterComponent.pushDatasetToAxe(axe, item, s_item.hsl, false);
+                            ChartFilterComponent.pushDatasetToAxe(axe, item, s_item.hsl, s_item.stepped,false);
                             // ChartFilterComponent.pushToDatasetParams(dataset_params, item);
                             break;
                         }
@@ -340,9 +341,9 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 const params: Chart_Item_Iface[] = [];
                 axe.datasets.forEach((ds) => {
                     if (ds.isParam) {
-                        params.push({id: ds.param_id, hsl: ds.extra.color});
+                        params.push({id: ds.param_id, hsl: ds.extra.color, stepped: ds.extra.stepped});
                     } else {
-                        items.push({id: ds.item_id, hsl: ds.extra.color});
+                        items.push({id: ds.item_id, hsl: ds.extra.color, stepped: ds.extra.stepped});
                     }
                 });
 
@@ -354,8 +355,8 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
     }
 
     initDeviceItemDatasets(): void {
-        const items = this.selectedItems.map(it => { return {id: it.id, hsl: null}; });
-        const params = this.paramSelected.map(it => { return {id: it.id, hsl: null}; });
+        const items = this.selectedItems.map(it => { return {id: it.id, hsl: null, stepped: null}; });
+        const params = this.paramSelected.map(it => { return {id: it.id, hsl: null, stepped: null}; });
         this.initDeviceItemDatasetsImpl(items, params, this.getCurrentAxis());
     }
 
@@ -370,7 +371,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 if (group.type_id === this.selectedItems[0].id) {
                     for (const item of group.items) {
                         if (item.type.save_algorithm > Save_Algorithm.SA_OFF) {
-                            ChartFilterComponent.pushDatasetToAxe(itemAxis, item, null, false);
+                            ChartFilterComponent.pushDatasetToAxe(itemAxis, item, null, null,false);
                         }
                     }
 
@@ -436,7 +437,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         for (const param of params) {
             for (const s_pt of filtered) {
                 if (s_pt.id === param.id) {
-                    ChartFilterComponent.pushDatasetToAxe(axe, param, s_pt.hsl, true);
+                    ChartFilterComponent.pushDatasetToAxe(axe, param, s_pt.hsl, s_pt.stepped,true);
                     // ChartFilterComponent.pushToDatasetParams(datasets, param, true);
                     break;
                 }
@@ -576,21 +577,21 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
 
         const axes = this.axes.map((axe) => {
             const datasets: Chart_Item_Config[] = axe.datasets
-                .map(({ item_id, param_id, isParam, extra: { color, hidden }}) => ({
+                .map(({ item_id, param_id, isParam, extra: { stepped, color, hidden }}) => ({
                     item_id, param_id, isParam,
                     extra: {
                         hidden,
+                        stepped,
                         color,
                     },
                 }));
 
-            const { id, isRight, stepped, display, from, to, order, displayGrid } = axe;
+            const { id, isRight, display, from, to, order, displayGrid } = axe;
 
             return {
                 id,
                 datasets,
                 isRight,
-                stepped,
                 display,
                 displayGrid,
                 from,
@@ -680,11 +681,30 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         }
 
         if (action.type === 'chart_axes') {
-            (<BuiltChartParams>action.data).axes.forEach((axe) => {
+            const builtChartParams = <BuiltChartParams>action.data;
+            builtChartParams.axes.forEach((axe) => {
                 const foundAxis = this.axes.find(a => a.id === axe.id);
-                foundAxis.from = axe.from;
-                foundAxis.to = axe.to;
-                foundAxis.display = axe.display;
+                if (foundAxis) {
+                    foundAxis.from = axe.from;
+                    foundAxis.to = axe.to;
+                    foundAxis.display = axe.display;
+
+                    builtChartParams.datasets.forEach((dataset) => {
+                        const isParam = !!dataset.param;
+                        const foundDataset = foundAxis.datasets.find((ds) => {
+                            if (ds.isParam !== isParam) return false;
+                            if (isParam) {
+                                return ds.param_id === dataset.param.id;
+                            } else {
+                                return ds.item_id === dataset.dev_item.id;
+                            }
+                        });
+
+                        if (foundDataset) {
+                            foundDataset.extra.stepped = dataset.stepped as boolean;
+                        }
+                    });
+                }
             });
         }
     }
@@ -798,18 +818,12 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
     }
 
     addAxis() {
-        let id;
+        const id = String.fromCharCode('A'.charCodeAt(0) + this.axes.length);
         let maxOrder;
 
         if (this.axes.length === 0) {
-            id = 'A';
             maxOrder = 0;
         } else {
-            const letter = this.axes
-                .map(axe => axe.id)
-                .reduce((prev, curr) => prev > curr ? prev : curr);
-            id = String.fromCharCode(letter.charCodeAt(0) + 1);
-
             maxOrder = this.axes
                 .map(axe => +axe.order)
                 .reduce((prev, curr) => prev > curr ? prev : curr);
@@ -818,7 +832,6 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         const axe: Axis_Params = {
             id,
             isRight: false,
-            stepped: false,
             display: 'auto',
             displayGrid: true,
             from: -50,
@@ -845,7 +858,6 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 this.addAxis(); // for param
 
                 const [, param] = this.axes;
-                param.stepped = true;
                 param.from = -1;
                 param.to = 2;
                 param.isRight = true;
@@ -869,6 +881,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         axe:  Axis_Params,
         item: Device_Item | DIG_Param,
         color: Hsl,
+        stepped: boolean,
         isParam: boolean
     ) {
         if (!color) {
@@ -885,6 +898,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 color,
                 displayColor: `hsl(${color.h}, ${color.s}%, ${color.l}%)`,
                 title: isParam ? (<DIG_Param>item).param.title : (<Device_Item>item).type.title,
+                stepped,
                 hidden: false,
             },
         });
@@ -934,7 +948,6 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 && axis.to === scale.to
                 && axis.isRight === scale.isRight
                 && axis.display === scale.display
-                && axis.stepped === scale.stepped
             );
 
             if (!axis) {
@@ -945,7 +958,6 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                     axis.from = scale.from;
                     axis.to = scale.to;
                     axis.display = scale.display;
-                    axis.stepped = scale.stepped;
                 } else {
                     // assign previous if one or more exist
                     if (this.axes.length > 0) {
@@ -962,10 +974,10 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
 
             if (it.item_id) {
                 itemsPerAxis[axis.id] ??= [];
-                itemsPerAxis[axis.id].push({id: it.item_id, hsl: ColorPickerDialog.rgbhex2hsl(it.extra.color)});
+                itemsPerAxis[axis.id].push({id: it.item_id, stepped: it.extra.axis_params.stepped || null, hsl: ColorPickerDialog.rgbhex2hsl(it.extra.color)});
             } else {
                 paramsPerAxis[axis.id] ??= [];
-                paramsPerAxis[axis.id].push({id: it.param_id, hsl: ColorPickerDialog.rgbhex2hsl(it.extra.color)});
+                paramsPerAxis[axis.id].push({id: it.param_id, stepped: it.extra.axis_params.stepped || null, hsl: ColorPickerDialog.rgbhex2hsl(it.extra.color)});
             }
         }
 
