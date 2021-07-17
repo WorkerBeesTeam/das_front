@@ -425,9 +425,14 @@ export class SchemeService extends ISchemeService {
             .catch(error => Observable.throw(error));
     }
 
-    get_charts(): Observable<Chart_old[]> {
-        let url = this.url('chart');
-        return this.getPiped<Chart_old[]>(url, `fetched chart list`, 'get_charts', []);
+    get_charts(): Observable<Saved_User_Chart[]> {
+        const url = `/api/v2/scheme/${this.scheme.parent_id || this.scheme.id}/chart/`;
+        return this.http.get<Saved_User_Chart[]>(url).pipe(
+            catchError((err: HttpErrorResponse) => {
+                alert(err.error + '\n' + err.message);
+                return of(null as Saved_User_Chart[]);
+            }),
+        );
     }
 
     del_chart(chart: Chart_old): Observable<boolean> {
