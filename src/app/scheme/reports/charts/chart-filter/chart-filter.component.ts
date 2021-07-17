@@ -330,27 +330,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         if ((<Chart_old>user_chart).items) {
             this.setupUserChart(<Chart_old>user_chart);
         } else {
-            const { axes } = <Saved_User_Chart>user_chart;
-            this.axes = axes.map((axe) => {
-                const axisParam = {
-                    ...axe,
-                    datasets: [],
-                };
-
-                const items: Chart_Item_Iface[] = [];
-                const params: Chart_Item_Iface[] = [];
-                axe.datasets.forEach((ds) => {
-                    if (ds.isParam) {
-                        params.push({id: ds.param_id, hsl: ds.extra.color, stepped: ds.extra.stepped});
-                    } else {
-                        items.push({id: ds.item_id, hsl: ds.extra.color, stepped: ds.extra.stepped});
-                    }
-                });
-
-                this.initDeviceItemDatasetsImpl(items, params, axisParam);
-
-                return axisParam;
-            });
+            this.setupUserChartNew(<Saved_User_Chart>user_chart);
         }
 
         this.selected_chart = {
@@ -547,27 +527,52 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
         this.charts_type = Chart_Type.CT_DEVICE_ITEM;
         this.OnChartsType(user_chart);
 
-        this.selectedItems = this.itemList.filter(item => {
-            for (const it of user_chart.items) {
-                if (item.id === it.item_id) {
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        this.paramSelected = this.paramList.filter(item => {
-            for (const it of user_chart.items) {
-                if (item.id === it.param_id) {
-                    return true;
-                }
-            }
-            return false;
-        });
-
         this.selected_chart = null;
         this.axes = [];
-        this.setupUserChart(user_chart, true);
+        if (user_chart.items) {
+            this.selectedItems = this.itemList.filter(item => {
+                for (const it of user_chart.items) {
+                    if (item.id === it.item_id) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            this.paramSelected = this.paramList.filter(item => {
+                for (const it of user_chart.items) {
+                    if (item.id === it.param_id) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            this.setupUserChart(user_chart, true);
+        } else {
+            const { items, params } = this.setupUserChartNew(user_chart, true);
+            this.selectedItems = this.itemList.filter(item => {
+                for (const it of items) {
+                    if (item.id === it.id) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            this.paramSelected = this.paramList.filter(item => {
+                for (const it of params) {
+                    if (item.id === it.id) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+        this.selected_chart = {
+            axes: this.axes,
+            name: this.translate.instant('REPORTS.CHARTS_ELEMENTS'),
+        };
         this.buildChart();
     }
 
@@ -997,5 +1002,39 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
 
                 this.initDeviceItemDatasetsImpl(items, params, axis);
             });
+    }
+
+    private setupUserChartNew(userChart: Saved_User_Chart, displayAuto: boolean = false) {
+        const { axes } = userChart;
+        let itemsFromAllAxes: Chart_Item_Iface[] = [];
+        let paramsFromAllAxes: Chart_Item_Iface[] = [];
+        this.axes = axes.map((axe) => {
+            const axisParam = {
+                ...axe,
+                datasets: [],
+            };
+
+            if (displayAuto) {
+                axisParam.display = 'auto';
+            }
+
+            const items: Chart_Item_Iface[] = [];
+            const params: Chart_Item_Iface[] = [];
+            axe.datasets.forEach((ds) => {
+                if (ds.isParam) {
+                    params.push({id: ds.param_id, hsl: ds.extra.color, stepped: ds.extra.stepped});
+                } else {
+                    items.push({id: ds.item_id, hsl: ds.extra.color, stepped: ds.extra.stepped});
+                }
+            });
+
+            this.initDeviceItemDatasetsImpl(items, params, axisParam);
+            itemsFromAllAxes = itemsFromAllAxes.concat(items);
+            paramsFromAllAxes = paramsFromAllAxes.concat(params);
+
+            return axisParam;
+        });
+
+        return { items: itemsFromAllAxes, params: paramsFromAllAxes };
     }
 }
