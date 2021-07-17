@@ -352,6 +352,11 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
                 return axisParam;
             });
         }
+
+        this.selected_chart = {
+            name: user_chart.name,
+            axes: this.axes,
+        };
     }
 
     initDeviceItemDatasets(): void {
