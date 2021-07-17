@@ -426,7 +426,7 @@ export class SchemeService extends ISchemeService {
     }
 
     get_charts(): Observable<Saved_User_Chart[]> {
-        const url = `/api/v2/scheme/${this.scheme.parent_id || this.scheme.id}/chart/`;
+        const url = `/api/v2/scheme/${this.scheme.id}/chart/`;
         return this.http.get<Saved_User_Chart[]>(url).pipe(
             catchError((err: HttpErrorResponse) => {
                 alert(err.error + '\n' + err.message);
