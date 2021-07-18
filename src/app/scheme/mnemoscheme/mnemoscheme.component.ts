@@ -64,6 +64,7 @@ export class MnemoschemeComponent implements OnInit {
         imgItems.forEach((elem) => {
             elem.addEventListener('click', (ev: MouseEvent) => {
                 ev.preventDefault();
+                ev.stopPropagation();
                 const digId = +elem.getAttribute('data-dig-id');
 
                 this.showDig(digId, {
@@ -226,5 +227,9 @@ export class MnemoschemeComponent implements OnInit {
         }
 
         return value;
+    }
+
+    imgContainerClick() {
+        this.deviceItemGroup = null;
     }
 }

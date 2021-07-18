@@ -25,10 +25,7 @@ import {MediaMatcher} from '@angular/cdk/layout';
 })
 export class DeviceItemGroupComponent implements OnInit {
     @Input() group: Device_Item_Group;
-    @Input() isCloseButtonEnabled: boolean;
     @Input() isEditorModeEnabled: boolean;
-
-    @Output() close: EventEmitter<void> = new EventEmitter();
 
     groupModes: DIG_Mode_Type[];
     canChangeMode: boolean;
