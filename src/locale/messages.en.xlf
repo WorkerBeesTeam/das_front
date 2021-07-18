@@ -689,7 +689,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="PARAMS.TITLE" datatype="html">
-        <source>Параметры</source>
+        <source>Уставки</source>
         <target>Parameters</target>
         <context-group purpose="location">
           <context context-type="sourcefile">app/scheme/manage/params-dialog.component.html</context>

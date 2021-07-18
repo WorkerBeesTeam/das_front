@@ -426,7 +426,7 @@
   </body></file>
   <file original="app/scheme/param/param.component.html" datatype="plaintext" source-language="ru" target-language="en"><body>
     <trans-unit id="PARAMS.TITLE" approved="yes">
-      <source xml:space="preserve">Параметры</source>
+      <source xml:space="preserve">Уставки</source>
       <target xml:space="preserve">Paramètres</target>
 
       <context-group purpose="location"><context context-type="sourcefile">app/scheme/manage/params-dialog.component.html</context><context context-type="linenumber">2</context></context-group><context-group purpose="location"><context context-type="sourcefile">app/scheme/param/param.component.html</context><context context-type="linenumber">2</context></context-group></trans-unit>

@@ -548,7 +548,7 @@
 				</context-group>
 			</trans-unit>
 			<trans-unit reformat="yes" datatype="html" merged-trans="yes" id="PARAMS.TITLE" size-unit="pixel" translate="yes" space="default">
-				<source>Параметры</source>
+				<source>Уставки</source>
 				<target xml:lang="mn">Параметрүүд</target>
 				<context-group purpose="location">
 					<context match-mandatory="no" context-type="sourcefile">app/scheme/manage/params-dialog.component.html</context>
