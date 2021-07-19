@@ -10,6 +10,10 @@
 <!--            <p></p>-->
             <div class="legend__item-axis">
                 {{ axe.id }}
+                (<span i18n="@@REPORTS.AXIS_FROM">От</span>
+                {{ axe.from }}
+                <span i18n="@@REPORTS.AXIS_TO">До</span>
+                {{ axe.to }})
                 <button (click)="toggleLegendModal(axe)" *ngIf="charts_type == chartType.CT_DEVICE_ITEM">
                     <mat-icon>{{ axe.showModal ? 'close' : 'settings' }}</mat-icon>
                 </button>
@@ -54,10 +58,10 @@
                              (click)="$event.stopPropagation();openColorPicker(ds)"
                         ></div>
                         {{ ds.extra.title }}
-                        <button (click)="$event.stopPropagation();openColorPicker(ds)" *ngIf="charts_type == chartType.CT_DEVICE_ITEM">
-                            <mat-icon>settings</mat-icon>
-                        </button>
                     </div>
+                    <button (click)="$event.stopPropagation();openColorPicker(ds)" *ngIf="charts_type == chartType.CT_DEVICE_ITEM">
+                        <mat-icon>settings</mat-icon>
+                    </button>
                 </div>
             </div>
         </div>
