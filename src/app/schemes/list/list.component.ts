@@ -22,9 +22,12 @@ import {SchemesList} from '../schemes-list';
 })
 export class SchemeListComponent extends SchemesList implements OnInit, OnDestroy {
   timeout: any;
-  is_admin: boolean;
   start = 0;
   limit = 10;
+
+  get isExtraList(): boolean {
+	  return this.authService.isExtraList();
+  }
 
   constructor(private router: Router,
               private schemesService: SchemesService,
@@ -55,8 +58,6 @@ export class SchemeListComponent extends SchemesList implements OnInit, OnDestro
   @ViewChild('searchBox', {static: true}) searchBox;
 
   ngOnInit() {
-    this.is_admin = this.authService.isAdmin();
-
     this.getSchemes();
 
     this.schemesService.getCities().subscribe(data => {
