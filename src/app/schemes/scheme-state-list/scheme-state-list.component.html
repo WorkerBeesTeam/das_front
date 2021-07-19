@@ -19,8 +19,8 @@
       <button i18n="@@SCHEME_STATE.CLOSE" class="scheme-state-modal__close-btn" (click)="toggleModal($event)">Закрыть</button>
     </div>
 
+    <div><span i18n="@@SCHEME_STATE.CONNECTION_STATE">Подключение</span>: {{ status_desc() }}</div>
     <div class="scheme-state-msgs-list" *ngIf="scheme?.messages">
-        <div>{{ status_desc() }}</div>
       <ng-container *ngFor="let msg of scheme.messages">
         <div class="scheme-state-msg
            scheme-state-msg--{{status_class[msg.status]}}" (click)="toggleModal($event)">
