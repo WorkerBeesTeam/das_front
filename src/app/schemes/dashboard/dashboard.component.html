@@ -6,9 +6,7 @@
              routerLink="/scheme/{{scheme?.name}}/elements/sections">
             <!--a class="detail" routerLink="/detail/{{scheme.name}}">?</a-->
             <div class="module scheme" *ngIf="scheme">
-                <mat-icon [matTooltip]="status_desc(scheme)" [ngClass]="status_class(scheme)"
-                          #tooltip="matTooltip" (click)="tooltip.toggle()"></mat-icon>
-                <app-scheme-state-list [messages]="scheme.messages"></app-scheme-state-list>
+                <app-scheme-state-list [scheme]="scheme"></app-scheme-state-list>
                 <h4>
                     {{scheme.title}}
                 </h4>
