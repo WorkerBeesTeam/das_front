@@ -43,12 +43,42 @@ export class SchemeComponent implements OnInit, OnDestroy, AfterViewInit {
     connection_str = ' '; // SchemeComponent.getConnectionString(false);
 
     connect_state: Connection_State = Connection_State.CS_DISCONNECTED;
-    private mod_state: boolean;
-    private loses_state: boolean;
+    mod_state: boolean;
+    loses_state: boolean;
     private active_route_component_: Component;
 
     get connected(): boolean {
         return this.connect_state !== Connection_State.CS_DISCONNECTED;
+    }
+
+    get messages(): any {
+        const msgArray = [];
+        for (const sect of this.schemeService.scheme.section) {
+            for (const grp of sect.groups) {
+                let status = 'Undefined',
+                    status_text = '';
+
+                if (grp.status_info !== undefined) {
+                    status = grp.status_info.short_text;
+                    status_text = grp.status_info.text;
+                }
+
+                if (status === 'Ok') {
+                    continue;
+                }
+
+                msgArray.push({
+                    section: sect.name,
+                    section_id: sect.id,
+                    group: grp.title ? grp.title : grp.type.title, // TODO: Why there are 'title' and 'type.title'?
+                    group_id: grp.id,
+                    status: status,
+                    text: status_text,
+                });
+            }
+        }
+
+        return msgArray;
     }
 
     private page_reload_dialog_ref: MatDialogRef<PageReloadDialogComponent> = undefined;
@@ -65,74 +95,6 @@ export class SchemeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private getConnectionString(connected: boolean): string {
         return connected ? undefined : this.translate.instant('CONNECTION_PROBLEM');
-    }
-
-    get status_class(): string {
-        if (this.connection_str !== undefined && this.connection_str !== ' ') {
-            return 'status_fail';
-        }
-
-        if (!this.status_checked) {
-            return 'status_check';
-        }
-
-        if (this.mod_state) {
-            return 'status_modified';
-        }
-
-        switch (this.connect_state) {
-            case Connection_State.CS_SERVER_DOWN:
-                return 'status_server_down';
-            case Connection_State.CS_DISCONNECTED:
-                return 'status_bad';
-            case Connection_State.CS_CONNECTED:
-                return 'status_ok';
-            case Connection_State.CS_CONNECTED_MODIFIED:
-                return 'status_modified';
-            case Connection_State.CS_DISCONNECTED_JUST_NOW:
-                return 'status_bad_just';
-            case Connection_State.CS_CONNECTED_JUST_NOW:
-                return 'status_sync';
-            case Connection_State.CS_CONNECTED_SYNC_TIMEOUT:
-                return 'status_ok';
-        }
-    }
-
-    get status_desc(): string {
-        if (this.connection_str !== undefined && this.connection_str !== ' ') {
-            return this.connection_str;
-        }
-
-        let result = '';
-
-        if (this.mod_state) {
-            result += this.translate.instant('MODIFIED') + '. ';
-        }
-
-
-        if (this.loses_state) {
-            result += this.translate.instant('WITH_LOSS');
-        }
-
-        if (this.status_checked) {
-            switch (this.connect_state) {
-                case Connection_State.CS_SERVER_DOWN:
-                    return this.translate.instant('SERVER_DOWN');
-                case Connection_State.CS_DISCONNECTED:
-                    return result + this.translate.instant('OFFLINE');
-                case Connection_State.CS_CONNECTED:
-                    return result + this.translate.instant('ONLINE');
-                case Connection_State.CS_CONNECTED_MODIFIED:
-                    return result + this.translate.instant('MODIFIED');
-                case Connection_State.CS_DISCONNECTED_JUST_NOW:
-                    return result + this.translate.instant('DISCONNECTED_JUST_NOW');
-                case Connection_State.CS_CONNECTED_JUST_NOW:
-                    return result + this.translate.instant('CONNECTED_JUST_NOW');
-                case Connection_State.CS_CONNECTED_SYNC_TIMEOUT:
-                    return result + this.translate.instant('CONNECTED_SYNC_TIMEOUT');
-            }
-        }
-        return this.translate.instant('WAIT') + '...';
     }
 
     constructor(

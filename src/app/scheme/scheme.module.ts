@@ -26,7 +26,6 @@ import {DevItemValueComponent, HoldingRegisterDialogComponent} from './dev-item-
 import {VideoStreamDialogComponent} from './dev-item-value/video-stream-dialog/video-stream-dialog.component';
 import {DragScrollComponent} from './drag-scroll.component';
 import {ParamItemComponent} from './param-item/param-item.component';
-import {SchemeStateComponent} from './scheme-state/scheme-state.component';
 import {SchemeSectionComponent} from './scheme-section/scheme-section.component';
 import {DocComponent} from './doc/doc.component';
 import {StatusManageDialogComponent} from './status-manage-dialog/status-manage-dialog.component';
@@ -88,7 +87,6 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
         DragScrollComponent,
         DragScrollComponent,
         ParamItemComponent,
-        SchemeStateComponent,
         SchemeSectionComponent,
         ParamsDialogComponent,
         DocComponent,

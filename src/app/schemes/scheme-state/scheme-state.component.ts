@@ -1,13 +1,13 @@
 import {Component, Input} from '@angular/core';
-import {Connection_State, Scheme} from '../../user';
+import {Connection_State} from '../../user';
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-scheme-state-list',
-  templateUrl: './scheme-state-list.component.html',
-  styleUrls: ['./scheme-state-list.component.css', '../schemes-list.css']
+  selector: 'app-scheme-state',
+  templateUrl: './scheme-state.component.html',
+  styleUrls: ['./scheme-state.component.css', '../schemes-list.css']
 })
-export class SchemeStateListComponent {
+export class SchemeStateComponent {
   status_class = {
     '1': 'ok',
     '2': 'undef',
@@ -18,27 +18,24 @@ export class SchemeStateListComponent {
   isModalOpen = false;
 
   get most_bad_status() {
-    return this.scheme?.messages?.reduce((acc, cur) => acc = cur.status > acc ? cur.status : acc, [1]);
+    return this.messages?.reduce((acc, cur) => acc = cur.status > acc ? cur.status : acc, [1]);
   }
 
   get isSchemeConnected(): boolean {
-      let connected;
-      switch (this.scheme.connect_state & 0b111) {
+      switch (this.connect_state & 0b111) {
           case Connection_State.CS_CONNECTED:
           case Connection_State.CS_CONNECTED_JUST_NOW:
           case Connection_State.CS_CONNECTED_SYNC_TIMEOUT:
-              connected = true;
-              break;
-          case Connection_State.CS_DISCONNECTED:
-          case Connection_State.CS_DISCONNECTED_JUST_NOW:
-          case Connection_State.CS_SERVER_DOWN:
-              connected = false;
+              return true;
       }
-
-      return connected;
+      return false;
   }
 
-  @Input() scheme: Scheme;
+  @Input() status_checked: boolean;
+  @Input() loses_state: boolean;
+  @Input() mod_state: boolean;
+  @Input() connect_state: Connection_State;
+  @Input() messages: any[];
 
   constructor(
       private translate: TranslateService,
@@ -52,17 +49,17 @@ export class SchemeStateListComponent {
   public status_desc(): string {
         let result = '';
 
-        if (this.scheme.mod_state) {
+        if (this.mod_state) {
             result += this.translate.instant('MODIFIED') + '. ';
         }
 
 
-        if (this.scheme.loses_state) {
+        if (this.loses_state) {
             result += 'С потерями пакетов. '; // TODO: translation
         }
 
-        if (this.scheme.status_checked) {
-            switch (this.scheme.connect_state) {
+        if (this.status_checked) {
+            switch (this.connect_state) {
                 case Connection_State.CS_SERVER_DOWN:
                     return this.translate.instant('SERVER_DOWN');
                 case Connection_State.CS_DISCONNECTED:
@@ -83,15 +80,15 @@ export class SchemeStateListComponent {
     }
 
     public get_status_class(): string { // TODO: remove this duplicate
-        if (!this.scheme.status_checked) {
+        if (!this.status_checked) {
             return 'status_check';
         }
 
-        if (this.scheme.mod_state) {
+        if (this.mod_state) {
             return 'status_modified';
         }
 
-        switch (this.scheme.connect_state) {
+        switch (this.connect_state) {
             case Connection_State.CS_CONNECTED_SYNC_TIMEOUT:
             //  return 'status_sync_fail';
             case Connection_State.CS_CONNECTED_MODIFIED:

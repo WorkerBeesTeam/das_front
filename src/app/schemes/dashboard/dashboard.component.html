@@ -6,7 +6,13 @@
              routerLink="/scheme/{{scheme?.name}}/elements/sections">
             <!--a class="detail" routerLink="/detail/{{scheme.name}}">?</a-->
             <div class="module scheme" *ngIf="scheme">
-                <app-scheme-state-list [scheme]="scheme"></app-scheme-state-list>
+                <app-scheme-state
+                    [connect_state]="scheme.connect_state"
+                    [mod_state]="scheme.mod_state"
+                    [loses_state]="scheme.loses_state"
+                    [messages]="scheme.messages"
+                    [status_checked]="scheme.status_checked"
+                ></app-scheme-state>
                 <h4>
                     {{scheme.title}}
                 </h4>

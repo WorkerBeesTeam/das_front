@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 
 import { SchemeDetailComponent } from './detail/detail.component';
-import { SchemeStateListComponent } from './scheme-state-list/scheme-state-list.component';
+import { SchemeStateComponent } from './scheme-state/scheme-state.component';
 import {MaterialModule} from '../material.module';
 import {SchemeGroupsModule} from '../scheme-groups/scheme-groups.module';
 
@@ -27,11 +27,11 @@ import {SchemeGroupsModule} from '../scheme-groups/scheme-groups.module';
     ],
   declarations: [
     SchemeDetailComponent,
-    SchemeStateListComponent,
+    SchemeStateComponent,
   ],
   exports: [
     SchemeDetailComponent,
-    SchemeStateListComponent,
+    SchemeStateComponent,
   ]
 })
 export class SchemesDetailModule { }
