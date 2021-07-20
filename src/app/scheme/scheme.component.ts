@@ -160,9 +160,6 @@ export class SchemeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngOnInit() {
-        const isAdmin = this.authService.isAdmin();
-        const isFullAccess = this.authService.isFullAccess();
-
         this.addMenu('detail', 'perm_device_information');
         this.addMenu('mnemoscheme', 'image');
         this.addMenu('elements', 'build');

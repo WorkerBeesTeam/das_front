@@ -1,7 +1,7 @@
-import {Chart, Axis_Params, Device_Item, DIG_Param} from '../../scheme';
+import {Chart_old, Axis_Config, Device_Item, DIG_Param, Chart_Item, Axis_Params} from '../../scheme';
 import {Hsl} from './color-picker-dialog/color-picker-dialog';
 import * as ChartJs from 'chart.js';
-import {ChartOptions} from 'chart.js';
+import Chart, {ChartOptions} from 'chart.js';
 
 export enum Chart_Type {
     CT_UNKNOWN,
@@ -32,36 +32,16 @@ export interface TimeFilter
     timeTo: number;
 }
 
-export interface Legend_Options {
-    idx: number;
-
-    color: Hsl;
-    displayColor: string;
-    stepped: boolean;
-    hidden: boolean;
-
-    scale: Omit<Axis_Params, 'id'>;
-}
-
-export interface ItemWithLegend<T> {
-    isParam: boolean;
-    item: T;
-    legend: Legend_Options;
-    label: string;
-
-    showModal?: boolean; // this param is needed to show/hide axis configuration modal
-}
-
 export interface Chart_Params {
     name: string;
-    dataset_params: ItemWithLegend<any>[],
+    axes: Axis_Params[];
 }
 
 export interface ChartFilter extends TimeFilter {
-    user_chart: Chart;
-    user_charts: Chart[];
+    user_chart: Chart_old;
+    user_charts: Chart_old[];
 
-    selected_charts?: Chart_Params[];
+    selected_chart?: Chart_Params;
 
     charts_type: Chart_Type;
     data_part_size: number;
@@ -75,7 +55,7 @@ export interface ZoomInfo extends TimeFilter {
 }
 
 export interface BuiltChartParams {
-    axes: Axis_Params[];
-    datasets: any[];
+    axes: Axis_Config[];
+    datasets: (Chart.ChartDataset<'line'> & { dev_item?: Device_Item, param?: DIG_Param })[];
 }
 

@@ -51,8 +51,16 @@ export class AuthenticationService {
       return this.isAuthorized_.asObservable();
   }
 
-  isFullAccess(): boolean {
-    return this.checkPermission('add_logentry');
+  canEditScheme(): boolean {
+    return this.checkPermission('edit_scheme');
+  }
+
+  canRestart(): boolean {
+    return this.checkPermission('restart');
+  }
+
+  isExtraList(): boolean {
+    return this.checkPermission('extra_list');
   }
 
   canChangeMode(): boolean {

@@ -1,4 +1,5 @@
 import {Observable} from 'rxjs';
+import {Hsl} from './reports/charts/color-picker-dialog/color-picker-dialog';
 
 export class Code_Item { // Скрипт автоматизации
   id: number;   // ID
@@ -246,31 +247,73 @@ export class DIG_Mode_Type {
   group_type_id: number;
 }
 
-export interface Axis_Params {
+export interface Axis_Config {
     id: string;
 
     isRight: boolean;
-    stepped: boolean;
     display: false | 'auto';
+    displayGrid: boolean;
     from: number | string;
     to: number | string;
     order: number | string;
+
+    showModal?: boolean;
+    allowDragOver?: boolean;
 }
 
-export class Chart_Item {
+export class Chart_Item_Config {
+    item_id: number;
+    param_id: number;
+
+    isParam: boolean;
+
+    extra?: {
+        hidden: boolean;
+        stepped: boolean;
+        color: Hsl;
+    };
+}
+
+export class Chart_Item<T = Device_Item | DIG_Param> extends Chart_Item_Config {
+    item: T;
+
+    extra?: Chart_Item_Config['extra'] & {
+        title: string;
+        displayColor: string;
+    };
+}
+
+export interface Axis_Params extends Axis_Config {
+    datasets: Chart_Item[];
+}
+
+export class Chart_Item_old {
     item_id: number;
     param_id: number;
 
     extra?: {
-        axis_params?: Omit<Axis_Params, "id">
+        axis_params?: Omit<Axis_Config, "id"> & { stepped: boolean };
         color: string;
     };
 }
 
-export class Chart {
+export class Chart_old {
     id: number;
     name: string;
-    items: Chart_Item[];
+    items: Chart_Item_old[];
+}
+
+export class Chart_Base {
+    id: number;
+    name: string;
+}
+
+export class Chart extends Chart_Base {
+    axes:  Axis_Params[];
+}
+
+export class Saved_User_Chart extends Chart_Base {
+    axes: (Axis_Config & { datasets: Chart_Item_Config[] })[];
 }
 
 export class Disabled_Status {

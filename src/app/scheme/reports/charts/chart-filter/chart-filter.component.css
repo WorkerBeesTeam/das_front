@@ -105,7 +105,18 @@ fieldset.chart_type {
     flex-direction: row;
     align-items: center;
     margin: 8px;
+    cursor: pointer;
     justify-content: space-between;
+}
+
+.legend__item-axis button, .legend__item button {
+    padding: 0;
+}
+
+.legend__item-axis button mat-icon, .legend__item button mat-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    font-size: 0.9rem;
 }
 
 .legend__item-axis-modal {
@@ -132,4 +143,9 @@ fieldset.chart_type {
 
 .legend__item-label div > * {
     flex: 1 1;
+}
+
+.dragging.allow-drag-over.legend-container,
+.dragging.legend-container:hover {
+    background-color: #C0C0C0;
 }

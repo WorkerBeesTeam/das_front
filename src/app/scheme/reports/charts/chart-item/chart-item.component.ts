@@ -27,12 +27,14 @@ import * as Chart from 'chart.js';
 
 import zoomPlugin from 'chartjs-plugin-zoom';
 import 'chartjs-adapter-moment';
-import {Axis_Params} from '../../../scheme';
-import {ChartOptions} from 'chart.js';
+import {Axis_Config} from '../../../scheme';
+import {ChartOptions, LinearScale, TooltipItem} from 'chart.js';
+import {ScaleWithLegendBox} from './scale-with-legend-box';
 
 Chart.Chart.register(
     Chart.TimeScale, Chart.LinearScale, Chart.LineController,
-    Chart.PointElement, Chart.LineElement, zoomPlugin,
+    Chart.PointElement, Chart.LineElement, zoomPlugin, ScaleWithLegendBox,
+    Chart.Tooltip,
 );
 
 @Component({
@@ -44,24 +46,58 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
     private readonly defaultYAxes_: any = {
         A: {
             id: 'A',
-            type: 'linear',
+            type: 'LinearWithLegend',
             position: 'left',
             display: 'auto',
+            title: {
+                display: true,
+                text: `      A      `,
+                align: 'start',
+                padding: { top: 5, bottom: -9 },
+            },
+            bounds: 'ticks',
+            beginAtZero: false,
+            offset: false,
+            min: -50,
+            max: 50,
+            grid: {
+                display: true,
+                drawTicks: false,
+            },
             ticks: {
                 backdropPadding: 0,
+                padding: 2,
+                callback: val => Math.round(val),
             },
         },
         B: {
             id: 'B',
-            type: 'linear',
+            type: 'LinearWithLegend',
             position: 'right',
             display: 'auto',
+            title: {
+                display: true,
+                text: `      B      `,
+                align: 'start',
+                padding: { top: 5, bottom: -9 },
+            },
+            bounds: 'ticks',
+            beginAtZero: false,
+            offset: false,
+            min: -50,
+            max: 50,
+            grid: {
+                display: true,
+                drawTicks: false,
+            },
             ticks: {
                 max: 2,
                 min: -1,
                 stepSize: 1,
                 suggestedMin: 0,
                 suggestedMax: 1,
+                padding: 2,
+                callback: val => Math.round(val),
             },
         },
     };
@@ -122,10 +158,9 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
             responsive: true,
             maintainAspectRatio: true,
             legend: { display: false },
-            tooltips: {
-                mode: 'nearest',
+            interaction: {
                 intersect: false,
-                callbacks: {label: (item, data) => this.onLabel(item, data)}
+                mode: 'nearest',
             },
             hover: {
                 mode: 'nearest',
@@ -181,7 +216,13 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
                         overScaleMode: 'y',
                         onZoomComplete: chart => this.onZoom(chart, true)
                     }
-                }
+                },
+                tooltip: {
+                    display: true,
+                    callbacks: {
+                        label: this.onLabel(),
+                    },
+                },
             },
         },
     } as Chart.ChartConfiguration<'line'>;
@@ -203,7 +244,19 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
             this.setupYAxisScale(this.leftYAxisLsKey, 'A');
             this.setupYAxisScale(this.rightYAxisLsKey, 'B');
         } else {
-            Object.assign(this.chartOptions.options.scales, this.yAxes || this.defaultYAxes_);
+            Object.keys(this.yAxes || this.defaultYAxes_)
+                .forEach((key) => {
+                    const left = this.chartOptions.options.scales[key];
+                    const right = (this.yAxes || this.defaultYAxes_)[key];
+                    if (left && right) {
+                        Object.assign(
+                            this.chartOptions.options.scales[key],
+                            (this.yAxes || this.defaultYAxes_)[key],
+                        );
+                    } else if (right) {
+                        this.chartOptions.options.scales[key] = right;
+                    }
+                });
         }
     }
 
@@ -342,7 +395,6 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
     setDataColor(dataset: any, hsl: Hsl): void
     {
         const hslStr = `${hsl.h}, ${hsl.s}%, ${hsl.l}%`;
-        console.log(hsl, hslStr);
         dataset.borderColor = `hsl(${hslStr}`;
         dataset.backgroundColor = `hsla(${hslStr},0.5)`;
         dataset.pointBorderColor = `hsla(${hslStr},0.7)`;
@@ -365,32 +417,34 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
         });
     }
 
-    onLabel(item, data): string {
-        let text = item.value;
-        const dataset = data.datasets[item.datasetIndex];
+    onLabel() {
+        const members = this.members;
+        return (item: TooltipItem<'line'>): string => {
+            const dataset = item.dataset;
+            const value = (<Chart.ScatterDataPoint>item.raw).y;
+            let text: string = value.toString();
 
-        const dev_item = dataset['dev_item'];
-        if (dev_item)
-        {
-            const value_view = dev_item.type.views?.find(vv => vv.value == item.value);
-            if (value_view)
-                text = value_view.view;
-        }
+            const dev_item = dataset['dev_item'];
+            if (dev_item) {
+                const value_view = dev_item.type.views?.find(vv => vv.value == value);
+                if (value_view)
+                    text = value_view.view;
+            }
 
-        if (dataset.usered_data) {
-            const x = dataset.data[item.index].x.getTime();
-            const user_id = dataset.usered_data[x];
-            if (dataset.usered_data[x]) {
-                console.dir(this.members);
-                for (const user of this.members) {
-                    if (user.id === user_id) {
-                        text += ' User: ' + user.name;
-                        break;
+            if (dataset['usered_data']) {
+                const { x } = (<Chart.ScatterDataPoint>item.dataset.data[item.dataIndex]);
+                const user_id = dataset['usered_data'][x];
+                if (dataset['usered_data'][x]) {
+                    for (const user of members) {
+                        if (user.id === user_id) {
+                            text += ' User: ' + user.name;
+                            break;
+                        }
                     }
                 }
             }
-        }
-        return dataset.label + ': ' + text;
+            return dataset.label + ': ' + text;
+        };
     }
 
     setViewportBounds(start: number, end: number, forceUpdate = true) {
@@ -451,18 +505,19 @@ export class ChartItemComponent extends LoadingProgressbar implements OnInit, On
         }));
     }
 
-    private getAxes(): Axis_Params[] {
+    private getAxes(): Axis_Config[] {
         return Object.keys(this.chart.scales)
             .map((key) => {
-                const scaleItem = this.chart.scales[key];
+                const scaleItem = this.chart.scales[key] as LinearScale;
                 return {
                     id: key,
                     isRight: scaleItem.position === 'right',
                     from: scaleItem.min,
                     to: scaleItem.max,
                     order: 0,
-                    stepped: null, // TODO: ??
+                    stepped: null,
                     display: scaleItem.options.display as 'auto' | false,
+                    displayGrid: scaleItem.options.grid.display,
                 };
             });
     }

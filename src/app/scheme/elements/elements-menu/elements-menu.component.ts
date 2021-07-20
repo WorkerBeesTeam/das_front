@@ -11,8 +11,12 @@ import {ControlService} from '../../control.service';
 export class ElementsMenuComponent implements OnInit {
     isEditorModeEnabled = false;
 
-    get isAdmin(): boolean {
-        return this.authService.isAdmin();
+    get canEditScheme(): boolean {
+        return this.authService.canEditScheme();
+    }
+
+    get canRestart(): boolean {
+        return this.authService.canRestart();
     }
 
     constructor(

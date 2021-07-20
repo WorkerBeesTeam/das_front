@@ -16,19 +16,15 @@ import {EditorModeFromSidebar} from '../../editor-mode-from-sidebar';
     styleUrls: ['./manage-devices.component.css', '../manage/manage.component.css', '../../device-item-group/device-item-group.component.css']
 })
 export class ManageDevicesComponent extends EditorModeFromSidebar implements OnInit {
-    isAdmin: boolean;
-
     devices: Device[];
 
     constructor(
-        private authService: AuthenticationService,
         private schemeService: SchemeService,
         private dialog: MatDialog,
         private ui: UIService,
         sidebar: SidebarService,
     ) {
         super(sidebar);
-        this.isAdmin = this.authService.isAdmin();
         this.devices = this.schemeService.scheme.device;
     }
 

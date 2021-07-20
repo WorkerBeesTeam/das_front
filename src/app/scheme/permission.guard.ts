@@ -42,7 +42,6 @@ export class PermissionGuard implements CanActivate, CanActivateChild {
 
     const userPerms = {
       'isAdmin': this.authService.isAdmin(),
-      'isFullAccess': this.authService.isFullAccess(),
       'isSpecial': this.authService.checkPermission('delete_signtype'),
     };
 
