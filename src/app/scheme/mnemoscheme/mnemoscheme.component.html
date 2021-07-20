@@ -2,7 +2,9 @@
     <button *ngFor="let m of mnemoscheme" mat-raised-button [color]="selected === m.id ? 'primary' : null" (click)="select(m.id)">{{ m.title }}</button>
 </div>
 <div *ngIf="mnemoscheme?.length === 0 && !isLoading" i18n="@@CONTROL.NO_ANYONE">Нет ни одной</div>
-<div *ngIf="selected" class="img-container" #imgContainer (window:resize)="adjustSvgHeight()">
+<div *ngIf="selected" class="img-container" #imgContainer
+     (window:resize)="adjustSvgHeight()"
+     (click)="imgContainerClick()">
     <div class="svg-elem-wrapper" #svgElement></div>
     <div *ngIf="deviceItemGroup"
          [style.left]="digOverlayPosition.x + 'px'"
@@ -10,8 +12,6 @@
          #overlay
          class="dig-overlay">
         <app-device-item-group
-            (close)="this.deviceItemGroup = null"
-            [isCloseButtonEnabled]="true"
             [group]="deviceItemGroup"
             [isEditorModeEnabled]="false"
         ></app-device-item-group>

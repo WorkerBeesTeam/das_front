@@ -540,7 +540,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="PARAMS.TITLE" datatype="html">
-        <source>Параметры</source><target state="new">Параметры</target>
+        <source>Уставки</source><target state="new">Уставки</target>
         <context-group purpose="location">
           <context context-type="sourcefile">app/scheme/manage/params-dialog.component.html</context>
           <context context-type="linenumber">2</context>
