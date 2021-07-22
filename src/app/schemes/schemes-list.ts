@@ -1,9 +1,10 @@
-import {Observable, Subject, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subject, Subscription} from 'rxjs';
 import {Connection_State, Scheme} from '../user';
 import {takeUntil} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {TranslateService} from '@ngx-translate/core';
-import {Component, Injectable, OnDestroy} from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
+import {DIG_Status_Category, DIG_Status_Type} from '../scheme/scheme';
 
 export class StatusItems {
     connection: number;
@@ -16,20 +17,11 @@ export class StatusItems {
     }[];
 }
 
-export class StatusInfo {
-    groupType_id: number;
-    id: number;
-    inform: boolean;
-    name: string;
-    text: string;
-    category_id: number;
-}
-
 @Injectable()
 export abstract class SchemesList implements OnDestroy {
     public schemes: Scheme[] = [];
 
-    private statusInfo = {};
+    private statusInfo: Record<number, DIG_Status_Type[]> = {};
     private statusQueue = {};
     protected statusItemSubs: Subscription[] = [];
 
@@ -51,54 +43,62 @@ export abstract class SchemesList implements OnDestroy {
     }
 
     protected getStatuses(schemes: Scheme[] = this.schemes) {
-        schemes.map(h => {
-            const id = h.parent || h.id;
+        schemes
+            .filter(h => !!h)
+            .map(h => {
+                const id = h.parent || h.id;
 
-            h.mod_state = false;
-            h.loses_state = false;
-            h.status_checked = false;
-            h.connect_state = Connection_State.CS_SERVER_DOWN;
+                h.mod_state = false;
+                h.loses_state = false;
+                h.status_checked = false;
+                h.connect_state = Connection_State.CS_SERVER_DOWN;
 
-            // get status
-            const sub = this.httpGet<StatusItems>(`/api/v2/scheme/${h.id}/dig_status`).subscribe(statusItems => {
-                h.messages = []; // 0 messages, wait
+                // get status
+                const sub = this.httpGet<StatusItems>(`/api/v2/scheme/${h.id}/dig_status`).subscribe(statusItems => {
+                    h.messages = []; // 0 messages, wait
 
-                // set connection status
-                h.connection = statusItems.connection;
-                const [connState, modState, losesState] = SchemesList.parseConnectNumber(h.connection);
-                h.mod_state = <boolean>modState;
-                h.loses_state = <boolean>losesState;
-                h.status_checked = true;
-                h.connect_state = <Connection_State>connState;
+                    // set connection status
+                    h.connection = statusItems.connection;
+                    const [connState, modState, losesState] = SchemesList.parseConnectNumber(h.connection);
+                    h.mod_state = <boolean>modState;
+                    h.loses_state = <boolean>losesState;
+                    h.status_checked = true;
+                    h.connect_state = <Connection_State>connState;
 
-                // set messages
-                if (this.statusInfo[id]) { // if we have StatusInfo
-                    // do it now
-                    this.putMessages(h.id, statusItems, this.statusInfo[id]);
-                } else { // if we haven't StatusInfo
-                    // put into queue
-                    if (!this.statusQueue[id]) {
-                        this.statusQueue[id] = {isLoading: false, depSchemes: []}; // create a place in queue
+                    // set messages
+                    if (this.statusInfo[id]) { // if we have StatusInfo
+                        // do it now
+                        this.putMessages(h.id, statusItems, this.statusInfo[id]);
+                    } else { // if we haven't StatusInfo
+                        // put into queue
+                        if (!this.statusQueue[id]) {
+                            this.statusQueue[id] = {isLoading: false, depSchemes: []}; // create a place in queue
+                        }
+                        this.statusQueue[id].depSchemes.push({id: h.id, si: statusItems}); // put scheme as a depeneded
+
+                        if (!this.statusQueue[id].isLoading) {
+                            // start loading if was not started
+                            this.statusQueue[id].isLoading = true;
+                            this.getStatusInfo(id, h.id);
+                        }
                     }
-                    this.statusQueue[id].depSchemes.push({id: h.id, si: statusItems}); // put scheme as a depeneded
 
-                    if (!this.statusQueue[id].isLoading) {
-                        // start loading if was not started
-                        this.statusQueue[id].isLoading = true;
-                        this.getStatusInfo(id, h.id);
-                    }
-                }
+                    sub.unsubscribe();
+                });
 
-                sub.unsubscribe();
+                this.statusItemSubs.push(sub);
             });
-
-            this.statusItemSubs.push(sub);
-        });
     }
 
     private getStatusInfo(id: number, real_id: number) {
-        const statusInfoSubs = this.http.get<any[]>(`/api/v2/scheme/${real_id}/dig_status_type`).subscribe(statusInfo => {
-            this.statusInfo[id] = statusInfo;
+        const statusInfoSubs = combineLatest([
+            this.http.get<DIG_Status_Type[]>(`/api/v2/scheme/${real_id}/dig_status_type`),
+            this.http.get<DIG_Status_Category[]>(`/api/v2/scheme/${real_id}/structure/dig_status_category/`),
+        ]).subscribe(([statusInfo, statusCategories]) => {
+            this.statusInfo[id] = statusInfo.map((info) => ({
+                ...info,
+                category: statusCategories.find((cat) => cat.id === info.category_id),
+            }));
 
             /*
             console.log(`${id} is loaded`);
@@ -109,7 +109,7 @@ export abstract class SchemesList implements OnDestroy {
                 // parse a queue
 
                 this.statusQueue[id].depSchemes.forEach((dh) => {
-                    this.putMessages(dh.id, dh.si, statusInfo);
+                    this.putMessages(dh.id, dh.si, this.statusInfo[id]);
                 });
             }
 
@@ -117,15 +117,30 @@ export abstract class SchemesList implements OnDestroy {
         });
     }
 
-    private putMessages(id: number, statusItems: StatusItems, st: StatusInfo[]) {
+    private putMessages(id: number, statusItems: StatusItems, st: DIG_Status_Type[]) {
         const scheme = this.schemes.find(h => h.id === id);
 
         for (let i = 0; i < statusItems.items.length; i++) {
             const si = statusItems.items[i];
 
-            const st_item = st.find(sti => sti.id === si.status_id);
-            if (st_item) {
-                scheme.messages.push({status: st_item.category_id, text: st_item.text, where: si.title});
+            const statusType = st.find(sti => sti.id === si.status_id);
+            if (statusType) {
+                let status;
+                switch (statusType.category.name) {
+                    case 'Warn':
+                        status = 3;
+                        break;
+                    case 'Error':
+                        status = 4;
+                        break;
+                    case 'Ok':
+                        status = 1;
+                        break;
+                    case 'Undefined':
+                    default:
+                        status = 2;
+                }
+                scheme.messages.push({status, text: statusType.text, where: si.title});
             }
         }
     }

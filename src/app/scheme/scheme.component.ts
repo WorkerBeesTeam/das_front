@@ -29,6 +29,13 @@ interface NavLink {
     styleUrls: ['./scheme.component.css'],
 })
 export class SchemeComponent implements OnInit, OnDestroy, AfterViewInit {
+    private readonly status_weight = {
+        'Ok': 1,
+        'Undefined': 2,
+        'Warn': 3,
+        'Error': 4,
+    };
+
     @ViewChild('sidebar', {read: ViewContainerRef}) sidebarContainerRef: ViewContainerRef;
     @ViewChild('sidebarMobile', {read: ViewContainerRef}) sidebarMobileContainerRef: ViewContainerRef;
 
@@ -72,7 +79,7 @@ export class SchemeComponent implements OnInit, OnDestroy, AfterViewInit {
                     section_id: sect.id,
                     group: grp.title ? grp.title : grp.type.title, // TODO: Why there are 'title' and 'type.title'?
                     group_id: grp.id,
-                    status: status,
+                    status: this.status_weight[status],
                     text: status_text,
                 });
             }

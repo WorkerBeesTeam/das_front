@@ -1,5 +1,5 @@
-import {Component, Input} from '@angular/core';
-import {Connection_State} from '../../user';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Connection_State, Scheme_Message} from '../../user';
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
@@ -18,7 +18,7 @@ export class SchemeStateComponent {
   isModalOpen = false;
 
   get most_bad_status() {
-    return this.messages?.reduce((acc, cur) => acc = cur.status > acc ? cur.status : acc, [1]);
+    return this.messages?.reduce((acc, cur) => cur.status > acc ? cur.status : acc, 1);
   }
 
   get isSchemeConnected(): boolean {
@@ -35,13 +35,14 @@ export class SchemeStateComponent {
   @Input() loses_state: boolean;
   @Input() mod_state: boolean;
   @Input() connect_state: Connection_State;
-  @Input() messages: any[];
+
+    @Input() messages: Scheme_Message<number>[];
 
   constructor(
       private translate: TranslateService,
   ) { }
 
-  toggleModal(e: any) {
+    toggleModal(e: any) {
       this.isModalOpen = !this.isModalOpen;
       e.stopPropagation();
   }
@@ -79,7 +80,7 @@ export class SchemeStateComponent {
         return this.translate.instant('WAIT') + '...';
     }
 
-    public get_status_class(): string { // TODO: remove this duplicate
+    public get_status_class(): string {
         if (!this.status_checked) {
             return 'status_check';
         }

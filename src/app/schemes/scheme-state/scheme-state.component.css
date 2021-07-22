@@ -43,7 +43,7 @@
   color: #fff;
 }
 
-.scheme-state-icon--ok, .scheme-state-msg--warn {
+.scheme-state-icon--ok, .scheme-state-msg--ok {
   background: #017f05;
 }
 
