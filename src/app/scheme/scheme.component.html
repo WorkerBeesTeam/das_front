@@ -4,10 +4,13 @@
     <div class="localnav-background"></div>
     <div class="localnav-content">
       <div class="localnav-title">
-        <mat-icon [matTooltip]="status_desc" [ngClass]="status_class"
-                  #tooltip="matTooltip" (click)="tooltip.toggle()"></mat-icon>
-
-        <app-scheme-state></app-scheme-state>
+          <app-scheme-state
+              [connect_state]="connect_state"
+              [mod_state]="mod_state"
+              [loses_state]="loses_state"
+              [messages]="messages"
+              [status_checked]="status_checked"
+          ></app-scheme-state>
 
         <app-drag-scroll *ngIf="schemeService.scheme">
             {{schemeService.scheme.title}}

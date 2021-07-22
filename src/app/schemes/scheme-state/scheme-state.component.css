@@ -1,5 +1,5 @@
 .scheme-state {
-  margin-left: 0.3em;
+  margin-right: 0.5em;
   width: 24px;
   height: 24px;
   display: flex;
@@ -27,6 +27,14 @@
   margin: 0;
 }
 
+.scheme-state-icon_little {
+    position: absolute;
+    right: -1px;
+    top: 16px;
+    height: 8px;
+    width: 8px;
+}
+
 .scheme-state-msg {
   display: block;
   background: #ccc;
@@ -35,7 +43,7 @@
   color: #fff;
 }
 
-.scheme-state-icon--ok, .scheme-state-msg--warn {
+.scheme-state-icon--ok, .scheme-state-msg--ok {
   background: #017f05;
 }
 
@@ -53,7 +61,7 @@
   left: 0;
   background: #fff;
   /*padding: 1em;*/
-  border: 1px solid #000;
+  border: 1px solid #aaa;
   z-index: 15;
   min-width: 320px;
   box-sizing: border-box;
@@ -69,10 +77,10 @@
 .scheme-state-msg__text {
   font-size: 12px;
   font-weight: 400;
-  margin-top: -1em;
+  margin-top: 0.5em;
 }
 
-.scheme-state-modal__tooblar {
+.hosue-state-modal__tooblar {
   display: none;
 }
 
@@ -96,7 +104,7 @@
     margin-bottom: 0.5em;
   }
 
-  .scheme-state-modal__tooblar {
+  .hosue-state-modal__tooblar {
     display: flex;
     margin-bottom: 0.5em;
   }
@@ -110,7 +118,6 @@
     padding-top: 1em;
     white-space: normal;
     line-height: 1.3em;
-    padding-bottom: 0.7em;
   }
 
   .scheme-state-msg__text {
@@ -129,7 +136,7 @@
 
 
 
-.scheme-state-modal__tooblar-spacer {
+.hosue-state-modal__tooblar-spacer {
   flex: 1;
 }
 
@@ -167,16 +174,4 @@
   line-height: 1.3em;
   padding-top: 9px;
   padding-bottom: 1em;
-}
-
-.scheme-state-modal__bkg {
-  background-color: #000;
-  bottom: 0;
-  display: block;
-  left: 0;
-  opacity: 0.75;
-  position: fixed;
-  right: 0;
-  top: 0;
-  z-index: 14;
 }

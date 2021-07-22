@@ -7,7 +7,7 @@ import { MatDialog} from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 
 import { of, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 import { Scheme} from '../../user';
 import { SchemesService } from '../schemes.service';

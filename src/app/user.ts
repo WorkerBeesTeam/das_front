@@ -46,6 +46,17 @@ export enum Connection_State {
   CS_CONNECTED_MODIFIED = 0x80
 }
 
+export interface Scheme_Message<T = string | number> {
+    status: T;
+    text: string;
+    where: string;
+
+    section?: string;
+    section_id?: number;
+    group?: string;
+    group_id?: number;
+}
+
 export class Scheme {
   id: number;
   name: string;       // Имя прокта латиницей и без спец. символов, используется как имя базы данных
@@ -56,7 +67,7 @@ export class Scheme {
   company: number | null;
   description: string;
   version: string;
-  messages: any[];
+  messages: Scheme_Message[];
   parent: number;
   connection: number;
   mod_state: boolean;

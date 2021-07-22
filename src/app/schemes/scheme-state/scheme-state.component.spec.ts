@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { SchemeStateComponent } from './scheme-state.component';
 
-describe('SchemeStateComponent', () => {
+describe('SchemeStateListComponent', () => {
   let component: SchemeStateComponent;
   let fixture: ComponentFixture<SchemeStateComponent>;
 
