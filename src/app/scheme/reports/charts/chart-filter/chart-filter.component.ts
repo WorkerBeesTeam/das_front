@@ -907,7 +907,7 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
             extra: {
                 color,
                 displayColor: `hsl(${color.h}, ${color.s}%, ${color.l}%)`,
-                title: isParam ? (<DIG_Param>item).param.title : (<Device_Item>item).type.title,
+                title: isParam ? `⚙️ ${(<DIG_Param>item).param.title}` : (<Device_Item>item).type.title,
                 stepped,
                 hidden: false,
             },
