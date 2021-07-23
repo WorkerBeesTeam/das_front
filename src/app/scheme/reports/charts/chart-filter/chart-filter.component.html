@@ -53,6 +53,7 @@
                          [style.text-decoration]="ds.extra?.hidden ? 'line-through' : 'inherit'"
                          (click)="toggleDatasetVisibility(ds)"
                     >
+                        <mat-icon style="cursor: move;vertical-align: middle;" *ngIf="charts_type === chartType.CT_DEVICE_ITEM">drag_indicator</mat-icon>
                         <div class="legend__item-color"
                              [style.background-color]="ds.extra?.displayColor"
                              (click)="$event.stopPropagation();openColorPicker(ds)"
