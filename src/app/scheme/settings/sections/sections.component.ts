@@ -45,6 +45,7 @@ export class GroupsComponent extends ChangeTemplate<Device_Item_Group> implement
     @Input() sct: Section;
 
     groupTypes: DIG_Type[];
+    sections: Section[];
 
     constructor(
         schemeService: SchemeService,
@@ -59,6 +60,7 @@ export class GroupsComponent extends ChangeTemplate<Device_Item_Group> implement
 
     ngOnInit() {
         this.groupTypes = this.schemeService.scheme.dig_type;
+        this.sections = this.schemeService.scheme.section;
         this.fillItems();
     }
 
