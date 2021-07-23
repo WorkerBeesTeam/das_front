@@ -36,6 +36,11 @@
       <mat-option *ngFor="let gtype of groupTypes" [value]="gtype.id">{{gtype.title}}</mat-option>
     </mat-select>
   </mat-form-field>
+    <mat-form-field>
+        <mat-select i18n-placeholder="@@SETTINGS.SECTION_ID" placeholder="ID секции" [(ngModel)]="sel_item.obj.section_id" (ngModelChange)="itemChanged()">
+            <mat-option *ngFor="let section of sections" [value]="section.id">{{ section.name }}</mat-option>
+        </mat-select>
+    </mat-form-field>
 </mat-expansion-panel>
 <mat-expansion-panel *ngIf="sel_item">
   <mat-expansion-panel-header>
