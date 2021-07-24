@@ -1,3 +1,12 @@
+:host {
+    margin: 0;
+    -webkit-column-break-inside: avoid; /* Chrome, Safari */
+    page-break-inside: avoid;           /* Theoretically FF 20+ */
+    break-inside: avoid-column;         /* IE 11 */
+    display: table;
+    width: 100%;
+}
+
 .dig-header a {
     color: #fff;
 }
