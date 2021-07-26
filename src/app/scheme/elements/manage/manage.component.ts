@@ -14,7 +14,7 @@ import {UIService} from '../../../ui.service';
 import {ChangeInfo, ChangeState, Structure_Type} from '../../settings/settings';
 import {SidebarService} from '../../sidebar.service';
 import {EditorModeFromSidebar} from '../../editor-mode-from-sidebar';
-import {addParamsToDig} from '../../add-params-helpers';
+import {addAllGroupParamsToDig} from '../../add-params-helpers';
 
 @Component({
     selector: 'app-manage',
@@ -92,7 +92,7 @@ export class ManageComponent extends EditorModeFromSidebar implements OnInit, Af
             .subscribe((createdGroup?: Device_Item_Group_Details) => {
                 if (!createdGroup) return;
 
-                addParamsToDig(this.ui, this.schemeService, createdGroup.id, createdGroup.type_id);
+                addAllGroupParamsToDig(this.ui, this.schemeService, createdGroup.id, createdGroup.type_id);
             });
     }
 

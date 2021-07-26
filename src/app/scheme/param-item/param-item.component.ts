@@ -7,6 +7,7 @@ import {Structure_Type} from '../settings/settings';
 import {UIService} from '../../ui.service';
 import {tap} from 'rxjs/operators';
 import {MatDialogRef} from '@angular/material/dialog';
+import {addParamsToGroups} from '../add-params-helpers';
 
 @Component({
     selector: 'app-param-item',
@@ -30,6 +31,7 @@ export class ParamItemComponent implements OnChanges {
     paramTypeIdFormControl: FormControl;
     paramTypeFormControl: FormControl;
     currentEditingParam: DIG_Param;
+    addParamsToGroups: boolean;
 
     constructor(
         private schemeService: SchemeService,
@@ -161,11 +163,17 @@ export class ParamItemComponent implements OnChanges {
 
     submitForm() {
         if (this.showNestedParamTypeForm) {
-            this.createParamType().subscribe((response) => {
-                this.createParam(response.inserted[0].id)
-                    .subscribe((response) => {
-                        this.resetForm();
-                    });
+            this.createParamType().subscribe((paramTypeResponse) => {
+                let of;
+                if (this.addParamsToGroups) {
+                    of = addParamsToGroups(this.schemeService, this.groupTypeId, paramTypeResponse.inserted.map(i => i.id));
+                } else {
+                    of = this.createParam(paramTypeResponse.inserted[0].id);
+                }
+
+                of.subscribe(() => {
+                    this.resetForm();
+                });
             });
         } else {
             if (this.paramTypeIdFormControl.valid) {
@@ -203,6 +211,7 @@ export class ParamItemComponent implements OnChanges {
             this.showNestedParamTypeForm = false;
         }
 
+        this.addParamsToGroups = true;
         this.showForm = false;
         this.currentEditingParam = null;
         this.paramTypeIdFormControl.reset();

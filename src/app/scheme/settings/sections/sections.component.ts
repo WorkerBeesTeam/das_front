@@ -6,7 +6,7 @@ import {SettingsService} from '../../settings.service';
 import {ChangeInfo, ChangeState, ChangeTemplate, Structure_Type} from '../settings';
 import {UIService} from '../../../ui.service';
 import {filter, switchMap} from 'rxjs/operators';
-import {addParamsToDigImpl} from '../../add-params-helpers';
+import {addAllGroupParamsToDigImpl} from '../../add-params-helpers';
 
 @Component({
     selector: 'app-sections',
@@ -89,7 +89,7 @@ export class GroupsComponent extends ChangeTemplate<Device_Item_Group> implement
                         if (!confirmation) return;
 
                         data.inserted.forEach((dig: Device_Item_Group) => {
-                            addParamsToDigImpl(this.schemeService, dig.id, dig.type_id);
+                            addAllGroupParamsToDigImpl(this.schemeService, dig.id, dig.type_id);
                         });
                     });
             });

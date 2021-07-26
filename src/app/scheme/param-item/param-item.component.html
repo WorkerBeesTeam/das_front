@@ -62,7 +62,14 @@
             <mat-option [value]="'new'" i18n="@@SCHEME.PARAM_ITEM.NEW_PARAM_TYPE">Новая</mat-option>
         </mat-select>
     </mat-form-field>
-    <app-param-type-form [formControl]="paramTypeFormControl" *ngIf="showNestedParamTypeForm"></app-param-type-form>
+    <ng-container *ngIf="showNestedParamTypeForm">
+        <app-param-type-form [formControl]="paramTypeFormControl"></app-param-type-form>
+        <div>
+            <mat-checkbox [(ngModel)]="addParamsToGroups" i18n="@@SCHEME.PARAM_ITEM.ADD_PARAM_TO_GROUPS">
+                Добавить во все контуры управления с таким же типом
+            </mat-checkbox>
+        </div>
+    </ng-container>
     <button mat-flat-button type="button" color="primary" (click)="submitForm()" i18n="@@CONTROL.SAVE">Сохранить</button>
     <button mat-flat-button type="button" (click)="resetForm()" i18n="@@CONTROL.CANCEL">Отмена</button>
 </div>
