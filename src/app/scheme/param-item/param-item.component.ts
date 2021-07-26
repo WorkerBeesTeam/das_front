@@ -209,8 +209,28 @@ export class ParamItemComponent implements OnChanges {
     }
 
     private getParamTypes() {
+        let existingParams;
+        if (this.parent_param) {
+            existingParams = this.parent_param.childs;
+        } else {
+            for (let s of this.schemeService.scheme.section) {
+                for (let g of s.groups) {
+                    if (this.groupId === g.id) {
+                        existingParams = g.params;
+                        break;
+                    }
+                }
+
+                if (existingParams) {
+                    break;
+                }
+            }
+        }
+
         this.params = this.schemeService.scheme.dig_param_type.filter((param) => {
             if (param.group_type_id !== this.groupTypeId) return false;
+            if (existingParams.find(p => p.id === param.id)) return false;
+
             return (!this.parent_param && param.parent_id === null) || (this.parent_param?.id === param.parent_id);
         });
     }

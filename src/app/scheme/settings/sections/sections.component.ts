@@ -5,6 +5,8 @@ import {Device_Item_Group, DIG_Param, DIG_Param_Type, DIG_Type, Section} from '.
 import {SettingsService} from '../../settings.service';
 import {ChangeInfo, ChangeState, ChangeTemplate, Structure_Type} from '../settings';
 import {UIService} from '../../../ui.service';
+import {filter, switchMap} from 'rxjs/operators';
+import {addParamsToDigImpl} from '../../add-params-helpers';
 
 @Component({
     selector: 'app-sections',
@@ -73,6 +75,28 @@ export class GroupsComponent extends ChangeTemplate<Device_Item_Group> implement
 
     initItem(obj: Device_Item_Group): void {
         obj.section_id = this.sct.id;
+        obj.params ??= [];
+        obj.items ??= [];
+    }
+
+    save(event: any = undefined) {
+        super.saveImpl(event)
+            .subscribe((data) => {
+                if (data.inserted?.length < 1) return;
+
+                this.ui.confirmationDialog('Добавить все уставки из типа контура?') // TODO: i18n
+                    .subscribe((confirmation) => {
+                        if (!confirmation) return;
+
+                        data.inserted.forEach((dig: Device_Item_Group) => {
+                            addParamsToDigImpl(this.schemeService, dig.id, dig.type_id);
+                        });
+                    });
+            });
+    }
+
+    typeChanged(obj: Device_Item_Group) {
+        obj.type = this.groupTypes.find(t => t.id === obj.type_id);
     }
 }
 

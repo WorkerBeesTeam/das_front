@@ -3,8 +3,7 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 
 import {SchemeService} from '../../scheme.service';
-import {Section} from '../../scheme';
-import {ControlService} from '../../control.service';
+import {Device_Item_Group, DIG_Param, DIG_Param_Type, Section} from '../../scheme';
 import {AuthenticationService} from '../../../authentication.service';
 import {Section_Details, SectionDetailDialogComponent} from './section-detail-dialog/section-detail-dialog.component';
 import {
@@ -12,9 +11,10 @@ import {
     DeviceItemGroupDetailDialogComponent
 } from './device-item-group-detail-dialog/device-item-group-detail-dialog.component';
 import {UIService} from '../../../ui.service';
-import {Structure_Type} from '../../settings/settings';
+import {ChangeInfo, ChangeState, Structure_Type} from '../../settings/settings';
 import {SidebarService} from '../../sidebar.service';
 import {EditorModeFromSidebar} from '../../editor-mode-from-sidebar';
+import {addParamsToDig} from '../../add-params-helpers';
 
 @Component({
     selector: 'app-manage',
@@ -89,7 +89,11 @@ export class ManageComponent extends EditorModeFromSidebar implements OnInit, Af
         this.dialog
             .open(DeviceItemGroupDetailDialogComponent, {width: '80%', data: { section_id: parentSection.id }})
             .afterClosed()
-            .subscribe((group?: Device_Item_Group_Details) => {});
+            .subscribe((createdGroup?: Device_Item_Group_Details) => {
+                if (!createdGroup) return;
+
+                addParamsToDig(this.ui, this.schemeService, createdGroup.id, createdGroup.type_id);
+            });
     }
 
     newSection() {
