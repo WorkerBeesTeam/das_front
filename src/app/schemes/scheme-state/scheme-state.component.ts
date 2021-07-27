@@ -3,51 +3,50 @@ import {Connection_State, Scheme_Message} from '../../user';
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-scheme-state',
-  templateUrl: './scheme-state.component.html',
-  styleUrls: ['./scheme-state.component.css', '../schemes-list.css']
+    selector: 'app-scheme-state',
+    templateUrl: './scheme-state.component.html',
+    styleUrls: ['./scheme-state.component.css', '../schemes-list.css']
 })
 export class SchemeStateComponent {
-  status_class = {
-    '1': 'ok',
-    '2': 'undef',
-    '3': 'warn',
-    '4': 'err'
-  };
+    status_class = {
+        '1': 'ok',
+        '2': 'undef',
+        '3': 'warn',
+        '4': 'err'
+    };
 
-  isModalOpen = false;
+    isModalOpen = false;
 
-  get most_bad_status() {
-    return this.messages?.reduce((acc, cur) => cur.status > acc ? cur.status : acc, 1);
-  }
+    get most_bad_status() {
+        return this.messages?.reduce((acc, cur) => cur.status > acc ? cur.status : acc, 1);
+    }
 
-  get isSchemeConnected(): boolean {
-      switch (this.connect_state & 0b111) {
-          case Connection_State.CS_CONNECTED:
-          case Connection_State.CS_CONNECTED_JUST_NOW:
-          case Connection_State.CS_CONNECTED_SYNC_TIMEOUT:
-              return true;
-      }
-      return false;
-  }
+    get isSchemeConnected(): boolean {
+        switch (this.connect_state & 0b111) {
+            case Connection_State.CS_CONNECTED:
+            case Connection_State.CS_CONNECTED_JUST_NOW:
+            case Connection_State.CS_CONNECTED_SYNC_TIMEOUT:
+                return true;
+        }
+        return false;
+    }
 
-  @Input() status_checked: boolean;
-  @Input() loses_state: boolean;
-  @Input() mod_state: boolean;
-  @Input() connect_state: Connection_State;
+    @Input() status_checked: boolean;
+    @Input() loses_state: boolean;
+    @Input() mod_state: boolean;
+    @Input() connect_state: Connection_State;
 
     @Input() messages: Scheme_Message<number>[];
 
-  constructor(
-      private translate: TranslateService,
-  ) { }
+    constructor(private translate: TranslateService) {
+    }
 
     toggleModal(e: any) {
-      this.isModalOpen = !this.isModalOpen;
-      e.stopPropagation();
-  }
+        this.isModalOpen = !this.isModalOpen;
+        e.stopPropagation();
+    }
 
-  public status_desc(): string {
+    public status_desc(): string {
         let result = '';
 
         if (this.mod_state) {
