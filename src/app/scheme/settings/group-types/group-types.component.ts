@@ -7,6 +7,7 @@ import {ChangeTemplate, Structure_Type} from '../settings';
 
 import {SettingsService} from '../../settings.service';
 import {UIService} from '../../../ui.service';
+import {addParamsToGroups} from '../../add-params-helpers';
 
 @Component({
   selector: 'app-group-types',
@@ -95,6 +96,23 @@ export class ParamTypesComponent extends ChangeTemplate<DIG_Param_Type> implemen
 
   ngOnInit() {
     this.fillItems();
+  }
+
+  save(event: any = undefined) {
+      super.saveImpl(event)
+          .subscribe((data) => {
+              if (data.inserted?.length < 1) return;
+
+              let paramsNames = data.inserted.map(t => (t as any).title).join(',');
+              this.ui.confirmationDialog(`Добавить уставку(и) ${paramsNames} в контуры управления с типом "${this.grouptype.title}"?`)
+                  .subscribe((confirmation) => { // TODO: i18n
+                      if (!confirmation) return;
+
+                      const paramTypesIds = data.inserted.map(t => t.id);
+                      addParamsToGroups(this.schemeService, this.grouptype.id, paramTypesIds)
+                          .subscribe(() => {});
+                  });
+          });
   }
 
   initItem(obj: DIG_Param_Type): void {

@@ -7,6 +7,7 @@ import {Structure_Type} from '../settings/settings';
 import {UIService} from '../../ui.service';
 import {tap} from 'rxjs/operators';
 import {MatDialogRef} from '@angular/material/dialog';
+import {addParamsToGroups} from '../add-params-helpers';
 
 @Component({
     selector: 'app-param-item',
@@ -30,6 +31,7 @@ export class ParamItemComponent implements OnChanges {
     paramTypeIdFormControl: FormControl;
     paramTypeFormControl: FormControl;
     currentEditingParam: DIG_Param;
+    addParamsToGroups: boolean;
 
     constructor(
         private schemeService: SchemeService,
@@ -161,11 +163,17 @@ export class ParamItemComponent implements OnChanges {
 
     submitForm() {
         if (this.showNestedParamTypeForm) {
-            this.createParamType().subscribe((response) => {
-                this.createParam(response.inserted[0].id)
-                    .subscribe((response) => {
-                        this.resetForm();
-                    });
+            this.createParamType().subscribe((paramTypeResponse) => {
+                let of;
+                if (this.addParamsToGroups) {
+                    of = addParamsToGroups(this.schemeService, this.groupTypeId, paramTypeResponse.inserted.map(i => i.id));
+                } else {
+                    of = this.createParam(paramTypeResponse.inserted[0].id);
+                }
+
+                of.subscribe(() => {
+                    this.resetForm();
+                });
             });
         } else {
             if (this.paramTypeIdFormControl.valid) {
@@ -203,14 +211,35 @@ export class ParamItemComponent implements OnChanges {
             this.showNestedParamTypeForm = false;
         }
 
+        this.addParamsToGroups = true;
         this.showForm = false;
         this.currentEditingParam = null;
         this.paramTypeIdFormControl.reset();
     }
 
     private getParamTypes() {
+        let existingParams;
+        if (this.parent_param) {
+            existingParams = this.parent_param.childs;
+        } else {
+            for (let s of this.schemeService.scheme.section) {
+                for (let g of s.groups) {
+                    if (this.groupId === g.id) {
+                        existingParams = g.params;
+                        break;
+                    }
+                }
+
+                if (existingParams) {
+                    break;
+                }
+            }
+        }
+
         this.params = this.schemeService.scheme.dig_param_type.filter((param) => {
             if (param.group_type_id !== this.groupTypeId) return false;
+            if (existingParams.find(p => p.id === param.id)) return false;
+
             return (!this.parent_param && param.parent_id === null) || (this.parent_param?.id === param.parent_id);
         });
     }

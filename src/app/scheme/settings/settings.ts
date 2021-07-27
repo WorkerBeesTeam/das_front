@@ -1,8 +1,9 @@
-import {SchemeService} from '../scheme.service';
+import {Patch_Structure_Response, SchemeService} from '../scheme.service';
 import {UIService} from '../../ui.service';
 import {Observable, isObservable} from "rxjs";
 
 import {ComponentCanDeactivate} from './pending-changes.guard';
+import {filter, map, switchMap, tap} from 'rxjs/operators';
 
 export enum Structure_Type {
     ST_UNKNOWN,
@@ -62,7 +63,7 @@ export abstract class ChangeTemplate<T extends { id: number }> implements Compon
         public schemeService: SchemeService,
         private itemType: new () => T,
         private settingName: Structure_Type,
-        private ui: UIService,
+        protected ui: UIService,
     ) {
     }
 
@@ -95,23 +96,26 @@ export abstract class ChangeTemplate<T extends { id: number }> implements Compon
         }
     }
 
-    save(evnt: any = undefined): void {
-        if (evnt !== undefined) {
-            evnt.stopPropagation();
+    public save(event: any = undefined): void {
+        this.saveImpl(event).subscribe(() => {});
+    }
+
+    protected saveImpl(event: any = undefined) {
+        if (event !== undefined) {
+            event.stopPropagation();
         }
 
-        this.ui.confirmationDialog()
-            .subscribe((confirmed) => {
-                if (!confirmed) {
-                    return;
-                }
-
-                this.saveSettings()
-                    .subscribe(() => {
-                        this.sel_item = null;
-                        this.fillItems();
-                    });
-            });
+        return this.ui.confirmationDialog()
+            .pipe(
+                filter((confirmed) => confirmed),
+                switchMap(() => this.saveSettings()),
+            )
+            .pipe(
+                tap(() => {
+                    this.sel_item = null;
+                    this.fillItems();
+                }),
+            );
     }
 
     cancel(evnt: any = undefined): void {
@@ -148,7 +152,7 @@ export abstract class ChangeTemplate<T extends { id: number }> implements Compon
         // Dialog
     }
 
-    saveSettings(items: ChangeInfo<T>[] = this.items): Observable<any> {
+    saveSettings(items: ChangeInfo<T>[] = this.items) {
         return this.schemeService.modify_structure(this.settingName, items);
     }
 

@@ -31,7 +31,7 @@
     <input matInput (ngModelChange)="itemChanged()" i18n-placeholder="@@SETTINGS.NAME2" placeholder="Название" [(ngModel)]="sel_item.obj.title"/>
   </mat-form-field>
   <mat-form-field>
-    <mat-select i18n-placeholder="@@SETTINGS.GROUP_TYPE" placeholder="Тип группы" [(ngModel)]="sel_item.obj.type_id" (ngModelChange)="itemChanged()">
+    <mat-select i18n-placeholder="@@SETTINGS.GROUP_TYPE" placeholder="Тип группы" [(ngModel)]="sel_item.obj.type_id" (ngModelChange)="itemChanged();typeChanged(sel_item.obj)">
       <mat-option><span i18n="@@CONTROL.NO">Нет</span></mat-option>
       <mat-option *ngFor="let gtype of groupTypes" [value]="gtype.id">{{gtype.title}}</mat-option>
     </mat-select>

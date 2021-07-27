@@ -7,7 +7,7 @@ import {DeviceItemGroupTypeDetailDialogComponent} from '../device-item-group-typ
 import {Structure_Type} from '../../../settings/settings';
 import {DetailDialog} from '../detail-dialog';
 
-export type Device_Item_Group_Details = Pick<Device_Item_Group, "title" | "type_id" | "mode">;
+export type Device_Item_Group_Details = Pick<Device_Item_Group, "id" | "title" | "type_id" | "mode">;
 
 @Component({
     selector: 'app-device-item-group-detail-dialog',
