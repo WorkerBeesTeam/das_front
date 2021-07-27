@@ -11,9 +11,9 @@
             <div class="legend__item-axis">
                 {{ axe.id }}
                 (<span i18n="@@REPORTS.AXIS_FROM">От</span>
-                {{ axe.from }}
+                {{ axe.from | number:'1.2-2' }}
                 <span i18n="@@REPORTS.AXIS_TO">До</span>
-                {{ axe.to }})
+                {{ axe.to | number:'1.2-2' }})
                 <button (click)="toggleLegendModal(axe)" *ngIf="charts_type == chartType.CT_DEVICE_ITEM">
                     <mat-icon>{{ axe.showModal ? 'close' : 'settings' }}</mat-icon>
                 </button>

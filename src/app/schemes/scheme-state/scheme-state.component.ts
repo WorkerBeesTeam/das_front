@@ -1,4 +1,13 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    DoCheck,
+    Input,
+    IterableDiffer,
+    IterableDiffers,
+    KeyValueDiffer,
+    KeyValueDiffers,
+} from '@angular/core';
 import {Connection_State, Scheme_Message} from '../../user';
 import {TranslateService} from '@ngx-translate/core';
 
@@ -7,7 +16,7 @@ import {TranslateService} from '@ngx-translate/core';
     templateUrl: './scheme-state.component.html',
     styleUrls: ['./scheme-state.component.css', '../schemes-list.css']
 })
-export class SchemeStateComponent {
+export class SchemeStateComponent implements DoCheck {
     status_class = {
         '1': 'ok',
         '2': 'undef',
@@ -37,8 +46,39 @@ export class SchemeStateComponent {
     @Input() connect_state: Connection_State;
 
     @Input() messages: Scheme_Message<number>[];
+    private messagesDiffer_: IterableDiffer<Scheme_Message<number>>;
+    private messagesDiffers_: Map<number, KeyValueDiffer<string, any>> = new Map();
 
-    constructor(private translate: TranslateService) {
+    constructor(private translate: TranslateService, private differ_: KeyValueDiffers, private itDiffer_: IterableDiffers, private changeDetectorRef: ChangeDetectorRef) {
+        this.messagesDiffer_ = this.itDiffer_.find([]).create();
+    }
+
+    ngDoCheck() {
+        let apply = false;
+        const changes = this.messagesDiffer_.diff(this.messages);
+        if (changes) {
+            changes.forEachAddedItem((item) => {
+                if (!this.messagesDiffers_.has(item.currentIndex)) {
+                    this.messagesDiffers_.set(item.currentIndex, this.differ_.find(item.item).create());
+                }
+            });
+
+            changes.forEachRemovedItem((item) => {
+               if (this.messagesDiffers_.has(item.previousIndex)) {
+                   this.messagesDiffers_.delete(item.previousIndex);
+               }
+            });
+            apply = true;
+        }
+
+        for (let [key, differ] of this.messagesDiffers_) {
+            const changes = differ.diff(this.messages[key]);
+            apply ||= !!changes;
+        }
+
+        if (apply) {
+            this.changeDetectorRef.detectChanges();
+        }
     }
 
     toggleModal(e: any) {
@@ -90,7 +130,7 @@ export class SchemeStateComponent {
 
         switch (this.connect_state) {
             case Connection_State.CS_CONNECTED_SYNC_TIMEOUT:
-            //  return 'status_sync_fail';
+                return 'status_sync_fail';
             case Connection_State.CS_CONNECTED_MODIFIED:
                 return 'status_modified';
             case Connection_State.CS_DISCONNECTED_JUST_NOW:

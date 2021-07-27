@@ -68,7 +68,7 @@ export abstract class SchemesList implements OnDestroy {
                     // set messages
                     if (this.statusInfo[id]) { // if we have StatusInfo
                         // do it now
-                        this.putMessages(h.id, statusItems, this.statusInfo[id]);
+                        this.putMessages(h.id, statusItems, this.statusInfo[id], schemes);
                     } else { // if we haven't StatusInfo
                         // put into queue
                         if (!this.statusQueue[id]) {
@@ -79,7 +79,7 @@ export abstract class SchemesList implements OnDestroy {
                         if (!this.statusQueue[id].isLoading) {
                             // start loading if was not started
                             this.statusQueue[id].isLoading = true;
-                            this.getStatusInfo(id, h.id);
+                            this.getStatusInfo(id, h.id, schemes);
                         }
                     }
 
@@ -90,7 +90,7 @@ export abstract class SchemesList implements OnDestroy {
             });
     }
 
-    private getStatusInfo(id: number, real_id: number) {
+    private getStatusInfo(id: number, real_id: number, schemes: Scheme[]) {
         const statusInfoSubs = combineLatest([
             this.http.get<DIG_Status_Type[]>(`/api/v2/scheme/${real_id}/dig_status_type`),
             this.http.get<DIG_Status_Category[]>(`/api/v2/scheme/${real_id}/structure/dig_status_category/`),
@@ -109,7 +109,7 @@ export abstract class SchemesList implements OnDestroy {
                 // parse a queue
 
                 this.statusQueue[id].depSchemes.forEach((dh) => {
-                    this.putMessages(dh.id, dh.si, this.statusInfo[id]);
+                    this.putMessages(dh.id, dh.si, this.statusInfo[id], schemes);
                 });
             }
 
@@ -117,8 +117,8 @@ export abstract class SchemesList implements OnDestroy {
         });
     }
 
-    private putMessages(id: number, statusItems: StatusItems, st: DIG_Status_Type[]) {
-        const scheme = this.schemes.find(h => h.id === id);
+    private putMessages(id: number, statusItems: StatusItems, st: DIG_Status_Type[], schemes?: Scheme[]) {
+        const scheme = schemes.find(h => h.id === id);
 
         for (let i = 0; i < statusItems.items.length; i++) {
             const si = statusItems.items[i];

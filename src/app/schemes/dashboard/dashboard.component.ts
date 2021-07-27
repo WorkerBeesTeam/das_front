@@ -29,8 +29,6 @@ export class DashboardComponent extends SchemesList implements OnInit, OnDestroy
 
     ngOnInit() {
         this.getSchemes();
-
-        this.getFavSchemes();
     }
 
     getSchemes(): void {
@@ -38,6 +36,7 @@ export class DashboardComponent extends SchemesList implements OnInit, OnDestroy
             .subscribe(data => {
                 this.schemes = data.results.slice(0, 5);
                 this.getStatuses();
+                this.getFavSchemes();
             });
     }
 
