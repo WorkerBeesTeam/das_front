@@ -89,32 +89,39 @@ export class SchemeStateComponent implements DoCheck {
     public status_desc(): string {
         let result = '';
 
-        if (this.mod_state) {
-            result += this.translate.instant('MODIFIED') + '. ';
-        }
-
-
-        if (this.loses_state) {
-            result += 'С потерями пакетов. '; // TODO: translation
-        }
-
         if (this.status_checked) {
-            switch (this.connect_state) {
+            switch (this.connect_state & 0b111) {
                 case Connection_State.CS_SERVER_DOWN:
-                    return this.translate.instant('SERVER_DOWN');
+                    result = this.translate.instant('SERVER_DOWN');
+                    break;
                 case Connection_State.CS_DISCONNECTED:
-                    return result + this.translate.instant('OFFLINE');
+                    result = this.translate.instant('OFFLINE');
+                    break;
                 case Connection_State.CS_CONNECTED:
-                    return result + this.translate.instant('ONLINE');
-                case Connection_State.CS_CONNECTED_MODIFIED:
-                    return result + this.translate.instant('MODIFIED');
+                    result = this.translate.instant('ONLINE');
+                    break;
                 case Connection_State.CS_DISCONNECTED_JUST_NOW:
-                    return result + this.translate.instant('DISCONNECTED_JUST_NOW');
+                    result = this.translate.instant('DISCONNECTED_JUST_NOW');
+                    break;
                 case Connection_State.CS_CONNECTED_JUST_NOW:
-                    return result + this.translate.instant('CONNECTED_JUST_NOW');
+                    result = this.translate.instant('CONNECTED_JUST_NOW');
+                    break;
                 case Connection_State.CS_CONNECTED_SYNC_TIMEOUT:
-                    return result + this.translate.instant('CONNECTED_SYNC_TIMEOUT');
+                    result = this.translate.instant('CONNECTED_SYNC_TIMEOUT');
+                    break;
             }
+
+            result += '. ';
+
+            if (this.loses_state) {
+                result += 'С потерями пакетов. '; // TODO: translation
+            }
+
+            if (this.mod_state) {
+                result += this.translate.instant('MODIFIED') + '. ';
+            }
+
+            return result;
         }
         return this.translate.instant('WAIT') + '...';
     }
