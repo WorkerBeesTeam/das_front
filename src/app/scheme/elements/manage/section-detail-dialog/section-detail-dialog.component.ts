@@ -16,7 +16,7 @@ export type Section_Details = Pick<Section, "name" | "day_start" | "day_end">
 export class SectionDetailDialogComponent extends DetailDialog<Section, SectionDetailDialogComponent> {
 
     constructor(
-        @Inject(MAT_DIALOG_DATA) section: Section,
+        @Inject(MAT_DIALOG_DATA) private section: Section,
         dialogRef: MatDialogRef<SectionDetailDialogComponent>,
         schemeService: SchemeService,
         fb: FormBuilder,
@@ -38,8 +38,8 @@ export class SectionDetailDialogComponent extends DetailDialog<Section, SectionD
         return {
             ...formValue,
             day_start: SectionDetailDialogComponent.convertTimeStringToSeconds(formValue.day_start),
-            day_end: SectionDetailDialogComponent.convertTimeStringToSeconds(formValue.value.day_end),
-            groups: [],
+            day_end: SectionDetailDialogComponent.convertTimeStringToSeconds(formValue.day_end),
+            groups: this.section.groups || [],
         };
     }
 
