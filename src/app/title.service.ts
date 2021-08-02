@@ -51,7 +51,7 @@ export class TitleService {
             child = child.firstChild;
         }
 
-        return ['DeviceAccess', ...title];
+        return title;
     }
 
     private getVar(name: string) {
