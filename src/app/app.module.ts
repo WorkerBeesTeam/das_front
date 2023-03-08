@@ -56,13 +56,9 @@ export function createTranslateLoader(http: HttpClient) {
         RememberPageLimitDirective,
         ConfirmationDialogComponent,
     ],
-    entryComponents: [
-        Create_Scheme_Dialog,
-        ConfirmationDialogComponent,
-    ],
     imports: [
         BrowserAnimationsModule,
-//    BrowserModule,
+        //    BrowserModule,
         FormsModule,
         ReactiveFormsModule,
         AppRoutingModule,
@@ -71,7 +67,7 @@ export function createTranslateLoader(http: HttpClient) {
         HttpClientXsrfModule.withOptions({
             cookieName: 'csrftoken',
             headerName: 'X-CSRFToken',
-        },),
+        }),
         TranslateModule.forRoot({
             loader: {
                 provide: TranslateLoader,

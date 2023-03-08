@@ -29,38 +29,35 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    ReportsRoutingModule,
-    MaterialModule,
-    MatMomentDateModule,
-    MatProgressBarModule,
-    MatSnackBarModule,
-    AngularMultiSelectModule,
-    TranslateModule.forChild({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient]
-      }
-    }),
-  ],
-  declarations: [
-    ColorPickerDialog,
-    ReportsComponent,
-    ChartsComponent,
-    ExportComponent,
-    ChartItemComponent,
-    ChartFilterComponent,
-    ReportsMenuComponent,
-  ],
-  entryComponents: [
-      ColorPickerDialog
-  ],
-  providers: [
-    { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } }
-  ]
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        ReportsRoutingModule,
+        MaterialModule,
+        MatMomentDateModule,
+        MatProgressBarModule,
+        MatSnackBarModule,
+        AngularMultiSelectModule,
+        TranslateModule.forChild({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        }),
+    ],
+    declarations: [
+        ColorPickerDialog,
+        ReportsComponent,
+        ChartsComponent,
+        ExportComponent,
+        ChartItemComponent,
+        ChartFilterComponent,
+        ReportsMenuComponent,
+    ],
+    providers: [
+        { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } }
+    ]
 })
 export class ReportsModule { }

@@ -28,44 +28,40 @@ import {ConfirmUnsavedChangesDialogComponent} from './confirm-unsaved-changes-di
 import {PendingChangesGuard} from './pending-changes.guard';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    SettingsRoutingModule,
-    MaterialModule,
-    AceEditorModule,
-    // use forRoot() in main app module only.
-  ],
-  declarations: [
-    SettingsComponent,
-    DevicesComponent,
-    DeviceItemsComponent,
-    SectionsComponent,
-    GroupsComponent, ParamsInGroupComponent,
-    GroupTypesComponent, ItemTypesComponent, ParamTypesComponent, StatusesComponent ,
-    DIG_Status_Category_Component,
-    SignTypesComponent,
-    Code_Item_Component,
-    EditorComponent,
-    PluginTypesComponent,
-    SaveTimersComponent,
-      Scheme_Copy_Dialog,
-      DigModeTypeComponent,
-      TranslationComponent,
-      ValueViewComponent,
-      ConfirmUnsavedChangesDialogComponent,
-  ],
-  entryComponents: [
-      Scheme_Copy_Dialog,
-      ConfirmUnsavedChangesDialogComponent,
-  ],
-  providers: [
-//    SchemeLoadGuard,
-//    ControlService,
-      PendingChangesGuard,
-      MetadataService,
-      CompleterService,
-  ]
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        SettingsRoutingModule,
+        MaterialModule,
+        AceEditorModule,
+        // use forRoot() in main app module only.
+    ],
+    declarations: [
+        SettingsComponent,
+        DevicesComponent,
+        DeviceItemsComponent,
+        SectionsComponent,
+        GroupsComponent, ParamsInGroupComponent,
+        GroupTypesComponent, ItemTypesComponent, ParamTypesComponent, StatusesComponent,
+        DIG_Status_Category_Component,
+        SignTypesComponent,
+        Code_Item_Component,
+        EditorComponent,
+        PluginTypesComponent,
+        SaveTimersComponent,
+        Scheme_Copy_Dialog,
+        DigModeTypeComponent,
+        TranslationComponent,
+        ValueViewComponent,
+        ConfirmUnsavedChangesDialogComponent,
+    ],
+    providers: [
+        //    SchemeLoadGuard,
+        //    ControlService,
+        PendingChangesGuard,
+        MetadataService,
+        CompleterService,
+    ]
 })
 export class SettingsModule { }

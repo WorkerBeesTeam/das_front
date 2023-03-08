@@ -109,14 +109,6 @@ export function HttpLoaderFactory(httpClient: HttpClient) {
         DeviceItemGroupComponent,
         LogSidebarComponent,
     ],
-    entryComponents: [
-        PageReloadDialogComponent,
-        HoldingRegisterDialogComponent,
-        VideoStreamDialogComponent,
-        ParamsDialogComponent,
-        StatusManageDialogComponent,
-        SectionDetailDialogComponent,
-    ],
     exports: [
         ParamComponent
     ],
