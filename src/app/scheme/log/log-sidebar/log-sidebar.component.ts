@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {SchemeService} from '../../scheme.service';
 import {DropdownSettings} from 'angular2-multiselect-dropdown/lib/multiselect.interface';
 import {Device_Item_Group, DIG_Param} from '../../scheme';
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 import * as moment from 'moment';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import {MAT_MOMENT_DATE_ADAPTER_OPTIONS, MAT_MOMENT_DATE_FORMATS, MomentDateAdapter} from '@angular/material-moment-adapter';
@@ -10,7 +10,7 @@ import {SidebarService} from '../../sidebar.service';
 
 type DIG_DropdownData = { folderName: string, label: string, value: number };
 
-function parseDate(date: FormControl, time: string): number {
+function parseDate(date: UntypedFormControl, time: string): number {
     let time_arr = time.split(':');
     let date_from = date.value.toDate();
     date_from.setHours(+time_arr[0], +time_arr[1], +time_arr[2] || 0);
@@ -22,7 +22,7 @@ function zero(n: number): string {
     return n >= 10 ? `${n}` : `0${n}`;
 }
 
-function parseDateToDateAndTime(date: number, fcRef: FormControl): string {
+function parseDateToDateAndTime(date: number, fcRef: UntypedFormControl): string {
     const d = new Date(date);
 
     fcRef.setValue(moment(d));
@@ -139,9 +139,9 @@ export class LogSidebarComponent implements OnInit {
     } as DropdownSettings;
 
     /* Переменные для работы со временем */
-    date_from = new FormControl(moment());
+    date_from = new UntypedFormControl(moment());
     time_from = '00:00:00';
-    date_to = new FormControl(moment());
+    date_to = new UntypedFormControl(moment());
     time_to = '23:59:59';
 
     /* Переменные для выбранных/введенных значений */

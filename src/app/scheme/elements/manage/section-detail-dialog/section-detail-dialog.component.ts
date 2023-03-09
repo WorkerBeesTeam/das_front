@@ -1,7 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import {Section} from '../../../scheme';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {SchemeService} from '../../../scheme.service';
 import {Structure_Type} from '../../../settings/settings';
 import {DetailDialog} from '../detail-dialog';
@@ -19,7 +19,7 @@ export class SectionDetailDialogComponent extends DetailDialog<Section, SectionD
         @Inject(MAT_DIALOG_DATA) private section: Section,
         dialogRef: MatDialogRef<SectionDetailDialogComponent>,
         schemeService: SchemeService,
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
     ) {
         super(dialogRef, section, schemeService, Structure_Type.ST_SECTION, fb);
     }
@@ -43,7 +43,7 @@ export class SectionDetailDialogComponent extends DetailDialog<Section, SectionD
         };
     }
 
-    createFormGroup(): FormGroup {
+    createFormGroup(): UntypedFormGroup {
         return this.fb.group({
             id: [null, []],
             name: ['', [Validators.required]],

@@ -2,7 +2,7 @@ import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 
 import {SchemeService} from '../scheme.service';
 import {DIG_Param, DIG_Param_Type, DIG_Param_Value_Type} from '../scheme';
-import {FormControl, Validators} from '@angular/forms';
+import {UntypedFormControl, Validators} from '@angular/forms';
 import {Structure_Type} from '../settings/settings';
 import {UIService} from '../../ui.service';
 import {tap} from 'rxjs/operators';
@@ -28,8 +28,8 @@ export class ParamItemComponent implements OnChanges {
     showForm = false;
     showNestedParamTypeForm = false;
 
-    paramTypeIdFormControl: FormControl;
-    paramTypeFormControl: FormControl;
+    paramTypeIdFormControl: UntypedFormControl;
+    paramTypeFormControl: UntypedFormControl;
     currentEditingParam: DIG_Param;
     addParamsToGroups: boolean;
 
@@ -38,8 +38,8 @@ export class ParamItemComponent implements OnChanges {
         private ui: UIService,
         private dialogRef: MatDialogRef<ParamItemComponent>,
     ) {
-        this.paramTypeFormControl = new FormControl(null, []);
-        this.paramTypeIdFormControl = new FormControl(null, [Validators.required]);
+        this.paramTypeFormControl = new UntypedFormControl(null, []);
+        this.paramTypeIdFormControl = new UntypedFormControl(null, [Validators.required]);
 
         this.paramTypeIdFormControl.valueChanges.subscribe((v) => {
             this.showNestedParamTypeForm = v === 'new';

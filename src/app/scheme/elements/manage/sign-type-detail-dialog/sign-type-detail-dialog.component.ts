@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {SchemeService} from '../../../scheme.service';
 import {Structure_Type} from '../../../settings/settings';
 
@@ -10,12 +10,12 @@ import {Structure_Type} from '../../../settings/settings';
     styleUrls: ['./sign-type-detail-dialog.component.css', '../detail-dialog.css']
 })
 export class SignTypeDetailDialogComponent {
-    fg: FormGroup;
+    fg: UntypedFormGroup;
 
     constructor(
         private dialogRef: MatDialogRef<SignTypeDetailDialogComponent>,
         private schemeService: SchemeService,
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
     ) {
         this.fg = fb.group({
             id: [null, []],

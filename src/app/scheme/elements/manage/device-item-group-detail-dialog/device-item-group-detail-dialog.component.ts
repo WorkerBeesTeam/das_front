@@ -1,7 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Device_Item_Group, DIG_Type} from '../../../scheme';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {SchemeService} from '../../../scheme.service';
 import {DeviceItemGroupTypeDetailDialogComponent} from '../device-item-group-type-detail-dialog/device-item-group-type-detail-dialog.component';
 import {Structure_Type} from '../../../settings/settings';
@@ -18,7 +18,7 @@ export class DeviceItemGroupDetailDialogComponent extends DetailDialog<Device_It
     groupTypes: DIG_Type[];
 
     constructor(
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
         dialogRef: MatDialogRef<DeviceItemGroupDetailDialogComponent>,
         schemeService: SchemeService,
         private dialog: MatDialog,
@@ -28,7 +28,7 @@ export class DeviceItemGroupDetailDialogComponent extends DetailDialog<Device_It
         this.groupTypes = this.schemeService.scheme.dig_type;
     }
 
-    createFormGroup(): FormGroup {
+    createFormGroup(): UntypedFormGroup {
         return this.fb.group({
             title: ['', []],
             type_id: [null, [Validators.required]],

@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import {DomSanitizer} from '@angular/platform-browser';
 
 import {MessageService} from '../message.service';
@@ -12,7 +12,7 @@ import {AuthenticationService} from '../authentication.service';
     styleUrls: ['./register.component.css']
 })
 export class RegisterComponent implements OnInit {
-    fg: FormGroup = this.fb.group({
+    fg: UntypedFormGroup = this.fb.group({
         'username': ['', [ Validators.required ]],
         'email': ['', [ Validators.email ]],
         'password': ['', [ Validators.required, Validators.minLength(8) ]],
@@ -30,7 +30,7 @@ export class RegisterComponent implements OnInit {
         private router: Router,
         private authService: AuthenticationService,
         private messageService: MessageService,
-        private fb: FormBuilder,
+        private fb: UntypedFormBuilder,
         private sanitizer: DomSanitizer,
     ) {
         this.fg.controls['email'].valueChanges.subscribe(this.copyFromEmailToLogin());
@@ -69,7 +69,7 @@ export class RegisterComponent implements OnInit {
     }
 
     private passwordsEqual(): ValidatorFn {
-        return (formGroup: FormGroup): ValidationErrors | null => {
+        return (formGroup: UntypedFormGroup): ValidationErrors | null => {
             const { password, passwordConfirm } = formGroup.value;
             return password !== passwordConfirm ? { passwordsEqual: true } : null;
         };

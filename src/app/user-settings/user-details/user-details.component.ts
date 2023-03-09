@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {TranslateService} from '@ngx-translate/core';
 
@@ -22,8 +22,8 @@ const httpOptions = {
 export class UserDetailsComponent implements OnInit {
   currentUser: any;
 
-  changePasswordGroup: FormGroup;
-  changeUserDetailsGroup: FormGroup;
+  changePasswordGroup: UntypedFormGroup;
+  changeUserDetailsGroup: UntypedFormGroup;
   newPassErrors = [];
   oldPassErrors = [];
   success = false;
@@ -33,7 +33,7 @@ export class UserDetailsComponent implements OnInit {
 
   constructor(
     public authService: AuthenticationService,
-    private formBuilder: FormBuilder,
+    private formBuilder: UntypedFormBuilder,
     protected http: HttpClient,
     public translate: TranslateService,
     private activatedRoute: ActivatedRoute,
@@ -59,7 +59,7 @@ export class UserDetailsComponent implements OnInit {
     });
   }
 
-  confirmValidator(group: FormGroup) {
+  confirmValidator(group: UntypedFormGroup) {
     // tslint:disable-next-line:triple-equals
     if (group.controls['new_password'].value == group.controls['confirm_password'].value) {
       return null;

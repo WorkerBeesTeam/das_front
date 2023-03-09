@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {Device, Plugin_Type} from '../../../scheme';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {SettingsService} from '../../../settings.service';
@@ -19,12 +19,12 @@ import {PaginatorApi} from '../../../../user';
 })
 export class DeviceDetailDialogComponent extends DetailDialog<Device, DeviceDetailDialogComponent> implements WithPlugin<Device> {
     readonly keys = Object.keys;
-    extraFields: FormArray;
+    extraFields: UntypedFormArray;
     plugins: Plugin_Type[];
     editingExtraFields: { title: string; value: string; }[];
 
     constructor(
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
         @Inject(MAT_DIALOG_DATA) dev: Device,
         dialogRef: MatDialogRef<DeviceDetailDialogComponent>,
         private dialog: MatDialog,
@@ -39,7 +39,7 @@ export class DeviceDetailDialogComponent extends DetailDialog<Device, DeviceDeta
     public init: (settingsService: SettingsService) => Observable<PaginatorApi<Plugin_Type>>;
     public pluginChanged: (pluginId: number, extra: string | Array<any>, isItem?: boolean) => void;
 
-    createFormGroup(): FormGroup {
+    createFormGroup(): UntypedFormGroup {
         this.buildExtraFields();
 
         const fg = this.fb.group({

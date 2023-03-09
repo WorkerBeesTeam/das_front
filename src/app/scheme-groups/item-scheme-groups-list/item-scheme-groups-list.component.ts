@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {Group_User_Roles, Scheme_Group} from '../../user';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {SchemesService} from '../../schemes/schemes.service';
 
 @Component({
@@ -16,13 +16,13 @@ export class ItemSchemeGroupsListComponent implements OnInit, OnChanges {
     @Output() add: EventEmitter<Scheme_Group & { role?: Group_User_Roles }> = new EventEmitter();
     @Output() remove: EventEmitter<Scheme_Group> = new EventEmitter();
 
-    addToSchemeGroupFg: FormGroup;
+    addToSchemeGroupFg: UntypedFormGroup;
     schemeGroups: Scheme_Group[];
     private _schemeGroups: Scheme_Group[];
 
     constructor(
         private schemesService: SchemesService,
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
     ) {
         this.addToSchemeGroupFg = fb.group({
             id: [null, [Validators.required]],

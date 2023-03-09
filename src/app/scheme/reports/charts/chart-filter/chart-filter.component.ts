@@ -1,5 +1,5 @@
 import {Component, IterableDiffer, IterableDiffers, OnDestroy, OnInit} from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 import * as moment from 'moment';
 import {BuiltChartParams, Chart_Info_Interface, Chart_Params, Chart_Type, ChartFilter, Select_Item_Iface} from '../chart-types';
 import {
@@ -31,7 +31,7 @@ interface Chart_Item_Iface {
     stepped: boolean;
 }
 
-function parseDate(date: FormControl, time: string): number {
+function parseDate(date: UntypedFormControl, time: string): number {
     let time_arr = time.split(':');
     let date_from = date.value.toDate();
     date_from.setHours(+time_arr[0], +time_arr[1], +time_arr[2] || 0);
@@ -43,7 +43,7 @@ function zero(n: number): string {
     return n >= 10 ? `${n}` : `0${n}`;
 }
 
-function parseDateToDateAndTime(date: number, fcRef: FormControl): string {
+function parseDateToDateAndTime(date: number, fcRef: UntypedFormControl): string {
     const d = new Date(date);
 
     fcRef.setValue(moment(d));
@@ -80,9 +80,9 @@ export class ChartFilterComponent implements OnInit, OnDestroy {
 
     // ngModels
     charts_type: Chart_Type = Chart_Type.CT_USER;
-    date_from = new FormControl(moment());
+    date_from = new UntypedFormControl(moment());
     time_from = '00:00:00';
-    date_to = new FormControl(moment());
+    date_to = new UntypedFormControl(moment());
     time_to = '23:59:59';
     user_chart: Chart_old | Saved_User_Chart;
     itemList = [];

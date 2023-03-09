@@ -1,19 +1,19 @@
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup} from '@angular/forms';
 import {Modify_Structure_Type, Patch_Structure_Response, SchemeService} from '../../scheme.service';
 import {Structure_Type} from '../../settings/settings';
 import {SettingsService} from '../../settings.service';
 import {Plugin_Type} from '../../scheme';
 
 export abstract class DetailDialog<T extends Modify_Structure_Type,C> {
-    public fg: FormGroup;
+    public fg: UntypedFormGroup;
 
     protected constructor(
         protected dialogRef: MatDialogRef<C>,
         protected dialogData: T,
         protected schemeService: SchemeService,
         protected settingName: Structure_Type,
-        protected fb: FormBuilder,
+        protected fb: UntypedFormBuilder,
         initFg = true,
     ) {
         if (initFg) {
@@ -48,7 +48,7 @@ export abstract class DetailDialog<T extends Modify_Structure_Type,C> {
         this.dialogRef.close(null);
     }
 
-    abstract createFormGroup(): FormGroup;
+    abstract createFormGroup(): UntypedFormGroup;
 
     createItem(formValue: any): T {
         return {...formValue};

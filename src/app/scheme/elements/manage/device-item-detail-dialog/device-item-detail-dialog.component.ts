@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {Device, Device_Item, Device_Item_Group, Device_Item_Type, Plugin_Type} from '../../../scheme';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {SchemeService} from '../../../scheme.service';
@@ -30,14 +30,14 @@ export class DeviceItemDetailDialogComponent extends DetailDialog<Device_Item, D
     pluginId: number;
     plugins: Plugin_Type[];
     editingExtraFields: { title: string, value: string }[];
-    extraFields: FormArray;
+    extraFields: UntypedFormArray;
 
     devItemTypes: Device_Item_Type[];
     devices: Device[];
     groups: Device_Item_Group[];
 
     constructor(
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
         @Inject(MAT_DIALOG_DATA) devItem: Device_Item & { disableChangeGroupId: boolean; disableDeviceIdChanging: boolean; },
         dialogRef: MatDialogRef<DeviceItemDetailDialogComponent>,
         schemeService: SchemeService,
@@ -66,7 +66,7 @@ export class DeviceItemDetailDialogComponent extends DetailDialog<Device_Item, D
     init: (settingsService: SettingsService) => Observable<PaginatorApi<Plugin_Type>>;
     pluginChanged: (pluginId: number, extra: string, isItem: boolean) => void;
 
-    createFormGroup(): FormGroup {
+    createFormGroup(): UntypedFormGroup {
         this.buildExtraFields();
 
         const fg = this.fb.group({

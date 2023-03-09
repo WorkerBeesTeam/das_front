@@ -1,7 +1,7 @@
 import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {SchemesService} from '../../schemes/schemes.service';
 import {Group_User_Roles, Scheme, User, UserHeader, UserHeaderWithRole} from '../../user';
-import {FormBuilder, FormGroup, ValidatorFn, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators} from '@angular/forms';
 import {DropdownSettings} from 'angular2-multiselect-dropdown/lib/multiselect.interface';
 import {TranslateService} from '@ngx-translate/core';
 
@@ -19,8 +19,8 @@ export class UsersAndSchemesComponent implements OnInit, OnChanges {
     groupUsers: UserHeaderWithRole[];
     groupSchemes: Pick<Scheme, 'id' | 'name' | 'title'>[];
 
-    userAddFg: FormGroup;
-    schemeAddFg: FormGroup;
+    userAddFg: UntypedFormGroup;
+    schemeAddFg: UntypedFormGroup;
     invitingUser = false;
 
     schemes: Pick<Scheme, 'id' | 'name' | 'title'>[] = [];
@@ -52,7 +52,7 @@ export class UsersAndSchemesComponent implements OnInit, OnChanges {
     constructor(
         private schemesService: SchemesService,
         private translate: TranslateService,
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
     ) {
         this.userAddFg = fb.group({
             email: [null, []],
@@ -150,7 +150,7 @@ export class UsersAndSchemesComponent implements OnInit, OnChanges {
     }
 
     emailOrUserValidator(): ValidatorFn {
-        return (fg: FormGroup) => {
+        return (fg: UntypedFormGroup) => {
             const ctrl = this.invitingUser ? fg.controls.email : fg.controls.user;
 
             if (ctrl.untouched || ctrl.invalid) {

@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {SchemesService} from '../../schemes/schemes.service';
 import {Scheme_Group} from '../../user';
 
@@ -12,10 +12,10 @@ export class CreateNewSchemeGroupComponent implements OnInit, OnChanges {
     @Input() group: Scheme_Group;
     @Output() groupChanged: EventEmitter<Scheme_Group> = new EventEmitter();
 
-    fg: FormGroup;
+    fg: UntypedFormGroup;
 
     constructor(
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
         private schemesService: SchemesService,
     ) {
         this.fg = fb.group({

@@ -1,5 +1,5 @@
 import {Component, forwardRef} from '@angular/core';
-import {ControlValueAccessor, FormBuilder, FormGroup, NG_VALUE_ACCESSOR, Validators} from '@angular/forms';
+import {ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators} from '@angular/forms';
 import {DIG_Param_Type, DIG_Param_Value_Type, DIG_Type} from '../../../scheme';
 import {SchemeService} from '../../../scheme.service';
 
@@ -18,14 +18,14 @@ export class ParamTypeFormComponent implements ControlValueAccessor {
         .map(key => ({ key, value: DIG_Param_Value_Type[key] }))
         .filter(i => typeof i.value === 'number');
 
-    paramTypeFg: FormGroup;
+    paramTypeFg: UntypedFormGroup;
     groupTypes: DIG_Type[];
     params: DIG_Param_Type[];
 
     private onChange: any;
     private onTouched: any;
 
-    constructor(scheme: SchemeService, formBuilder: FormBuilder) {
+    constructor(scheme: SchemeService, formBuilder: UntypedFormBuilder) {
         this.paramTypeFg = formBuilder.group({
             title: ['', []],
             name: ['', [Validators.required]],

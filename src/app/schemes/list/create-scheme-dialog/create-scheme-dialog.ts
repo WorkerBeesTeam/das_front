@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, FormGroupDirective, NgForm, Validators, ValidatorFn, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, FormGroupDirective, NgForm, Validators, ValidatorFn, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
@@ -12,7 +12,7 @@ import {TranslateService} from '@ngx-translate/core';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class MyErrorStateMatcher implements ErrorStateMatcher {
-    isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    isErrorState(control: UntypedFormControl | null, form: FormGroupDirective | NgForm | null): boolean {
         const isSubmitted = form && form.submitted;
         return !!(control && (control.invalid || control.pending) && (control.dirty || control.touched || isSubmitted));
     }
@@ -48,21 +48,21 @@ export function unique_scheme_name_validator(schemesService: SchemesService): As
   styleUrls: [ './create-scheme-dialog.css']
 })
 export class Create_Scheme_Dialog implements OnInit {
-    fc_name = new FormControl('', [
+    fc_name = new UntypedFormControl('', [
         Validators.required,
         Validators.minLength(3),
         forbidden_name_validator(/^[a-zA-Z][a-zA-Z0-9\_]+$/)
     ], unique_scheme_name_validator(this.schemesService));
 
-    fc_title = new FormControl('');
-    fc_address = new FormControl('');
-    fc_cities = new FormControl(null);
-    fc_comp = new FormControl(null);
-    fc_desc = new FormControl('');
-    fc_parent = new FormControl(null);
-    fc_s_groups = new FormControl([], [Validators.required]);
+    fc_title = new UntypedFormControl('');
+    fc_address = new UntypedFormControl('');
+    fc_cities = new UntypedFormControl(null);
+    fc_comp = new UntypedFormControl(null);
+    fc_desc = new UntypedFormControl('');
+    fc_parent = new UntypedFormControl(null);
+    fc_s_groups = new UntypedFormControl([], [Validators.required]);
 
-    form = new FormGroup({
+    form = new UntypedFormGroup({
         name: this.fc_name,
         title: this.fc_title,
         address: this.fc_address,

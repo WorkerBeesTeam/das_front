@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
 //import { MAT_MOMENT_DATE_FORMATS, MomentDateAdapter } from '@angular/material-moment-adapter';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, NativeDateAdapter} from '@angular/material/core';
@@ -52,9 +52,9 @@ interface TimeZone {
   ],*/
 })
 export class ExportComponent implements OnInit {
-  firstFormGroup: FormGroup;
-  secondFormGroup: FormGroup;
-  dataFormGroup: FormGroup;
+  firstFormGroup: UntypedFormGroup;
+  secondFormGroup: UntypedFormGroup;
+  dataFormGroup: UntypedFormGroup;
 
   schemes: Scheme[] = [];
   types: Device_Item_Type[];
@@ -67,7 +67,7 @@ export class ExportComponent implements OnInit {
   tzs: TimeZone[];
 
   constructor(
-    private _formBuilder: FormBuilder,
+    private _formBuilder: UntypedFormBuilder,
     private schemeService: SchemeService,
     private schemesService: SchemesService,
     private route: ActivatedRoute,

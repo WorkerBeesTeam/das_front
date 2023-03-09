@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Device_Item_Type, DIG_Type, Register_Type, Save_Algorithm, Save_Timer, Sign_Type} from '../../../scheme';
 import {SchemeService} from '../../../scheme.service';
@@ -25,7 +25,7 @@ export class DeviceItemTypeDetailDialogComponent extends DetailDialog<Device_Ite
     groupTypes: DIG_Type[];
 
     constructor(
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
         dialogRef: MatDialogRef<DeviceItemTypeDetailDialogComponent>,
         @Inject(MAT_DIALOG_DATA) data: Device_Item_Type & { disableGroupTypeChanging: boolean },
         schemeService: SchemeService,
@@ -44,7 +44,7 @@ export class DeviceItemTypeDetailDialogComponent extends DetailDialog<Device_Ite
         settings.getSaveTimers().subscribe(timers => this.saveTimers = timers.results);
     }
 
-    createFormGroup(): FormGroup {
+    createFormGroup(): UntypedFormGroup {
         const group = this.fb.group({
             id: [null, []],
             name: ['', [Validators.required]],

@@ -1,7 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import {DetailDialog} from '../detail-dialog';
 import {Plugin_Type} from '../../../scheme';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormGroup, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SchemeService} from '../../../scheme.service';
 import {Structure_Type} from '../../../settings/settings';
@@ -14,7 +14,7 @@ import {Structure_Type} from '../../../settings/settings';
 export class PluginDetailDialogComponent extends DetailDialog<Plugin_Type, PluginDetailDialogComponent> {
 
     constructor(
-        fb: FormBuilder,
+        fb: UntypedFormBuilder,
         dialogRef: MatDialogRef<PluginDetailDialogComponent>,
         @Inject(MAT_DIALOG_DATA) data: Plugin_Type,
         schemeService: SchemeService,
@@ -25,7 +25,7 @@ export class PluginDetailDialogComponent extends DetailDialog<Plugin_Type, Plugi
     ngOnInit(): void {
     }
 
-    createFormGroup(): FormGroup {
+    createFormGroup(): UntypedFormGroup {
         return this.fb.group({
             'id': [],
             'name': ['', [Validators.required]],
