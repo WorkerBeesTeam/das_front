@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {AuthenticationService} from '../../../authentication.service';
 import {SchemeService} from '../../scheme.service';
 import {Device, Device_Item} from '../../scheme';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {DeviceDetailDialogComponent} from '../manage/device-detail-dialog/device-detail-dialog.component';
 import {DeviceItemDetailDialogComponent} from '../manage/device-item-detail-dialog/device-item-detail-dialog.component';
 import {UIService} from '../../../ui.service';

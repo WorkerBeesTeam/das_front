@@ -34,7 +34,7 @@ import {FavService} from './fav.service';
 import {TgAuthComponent} from './tg-auth/tg-auth.component';
 import {RememberPageLimitDirective} from './remember-page-limit.directive';
 import {PaginatorIntlService} from './paginator-intl.service';
-import {MatPaginatorIntl} from '@angular/material/paginator';
+import {MatLegacyPaginatorIntl as MatPaginatorIntl} from '@angular/material/legacy-paginator';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 import {Title} from '@angular/platform-browser';
 

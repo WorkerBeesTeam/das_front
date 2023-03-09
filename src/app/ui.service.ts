@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {BreakpointObserver, BreakpointState} from '@angular/cdk/layout';
 import {Observable} from 'rxjs';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ConfirmationDialogComponent} from './confirmation-dialog/confirmation-dialog.component';
 
 @Injectable()

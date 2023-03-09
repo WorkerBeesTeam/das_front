@@ -11,9 +11,9 @@ import {
     ViewContainerRef
 } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {PageEvent} from '@angular/material/paginator';
+import {LegacyPageEvent as PageEvent} from '@angular/material/legacy-paginator';
 import {MatSort} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
+import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
 import {TranslateService} from '@ngx-translate/core';
 import {ActivatedRoute} from '@angular/router';
 import {CookieService} from 'ngx-cookie-service';
@@ -49,9 +49,9 @@ import {
     ValuesLogFilter
 } from './log-sidebar/log-sidebar.component';
 import {LoadingProgressbar} from '../loading-progressbar/loading.progressbar';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import {VideoStreamDialogComponent} from '../dev-item-value/video-stream-dialog/video-stream-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 
 interface LogItem {
     type_id: string;
